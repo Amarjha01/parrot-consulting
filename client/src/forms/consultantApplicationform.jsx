@@ -1,141 +1,681 @@
-import React, { useState } from "react";
-import { registerAsConsultant } from "../service/consultantApi";
+import { useState } from 'react';
+import { registerAsConsultant } from '../service/consultantApi.js';
 
 export default function ConsultantApplicationForm() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phoneNumber: "",
-    address: "",
-    experience: "",
-    primaryCategory: "",
-    specializedServices: "",
-    keySkills: "",
-    languageProficiency: "",
-    availabilityPerWeek: "",
-    hourlyRate: "",
-    preferredWorkingHours: "",
-    bookingLeadTime: "",
+    name: '',
+    email: '',
+    password: '',
+    phoneNumber: '',
+    address: '',
+    experience: '',
+    primaryCategory: '',
+    specializedServices: '',
+    keySkills: '',
+    languageProficiency: [],
+    availabilityPerWeek: 20,
+    hourlyRate: '',
+    preferredWorkingHours: '',
+    bookingLeadTime: '',
     acceptedTerms: false,
     visibleOnPlatform: false,
+    education: []
   });
 
-  const [education, setEducation] = useState([
-    { qualification: "", university: "", fieldOfStudy: "", graduationYear: "" },
-  ]);
-
   const [files, setFiles] = useState({
-    resume: null,
     profilePicture: null,
+    resume: null,
     aadhaarCard: null,
     panCard: null,
     passport: null,
-    certificates: [],
+    certificates: []
   });
+
+  const [educationFields, setEducationFields] = useState([
+    { qualification: '', university: '', fieldOfStudy: '', graduationYear: '' }
+  ]);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleFileChange = (e) => {
     const { name, files: uploadedFiles } = e.target;
-    if (name === "certificates") {
-      setFiles((prev) => ({ ...prev, certificates: [...prev.certificates, ...uploadedFiles] }));
+    if (name === 'certificates') {
+      setFiles(prev => ({
+        ...prev,
+        certificates: [...prev.certificates, ...uploadedFiles]
+      }));
     } else {
-      setFiles((prev) => ({ ...prev, [name]: uploadedFiles[0] }));
+      setFiles(prev => ({
+        ...prev,
+        [name]: uploadedFiles[0]
+      }));
     }
   };
 
   const handleEducationChange = (index, field, value) => {
-    const updated = [...education];
+    const updated = [...educationFields];
     updated[index][field] = value;
-    setEducation(updated);
+    setEducationFields(updated);
   };
 
   const addEducationField = () => {
-    setEducation([...education, { qualification: "", university: "", fieldOfStudy: "", graduationYear: "" }]);
+    setEducationFields(prev => [...prev, { qualification: '', university: '', fieldOfStudy: '', graduationYear: '' }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
-    const form = new FormData();
-    for (let key in formData) {
-      if (key === "specializedServices" || key === "keySkills" || key === "languageProficiency") {
-        form.append(key, JSON.stringify(formData[key].split(',').map(i => i.trim())));
-      } else {
-        form.append(key, formData[key]);
-      }
+    // Validation for required files
+    if (!files.profilePicture) {
+      setError('Profile picture is required');
+      setLoading(false);
+      return;
+    }
+    if (!files.resume) {
+      setError('Resume is required');
+      setLoading(false);
+      return;
+    }
+    if (!files.aadhaarCard) {
+      setError('Aadhaar Card is required');
+      setLoading(false);
+      return;
+    }
+    if (!files.panCard) {
+      setError('PAN Card is required');
+      setLoading(false);
+      return;
     }
 
-    form.append("education", JSON.stringify(education));
-
-    // Append required files
-    form.append("resume", files.resume);
-    form.append("profilePicture", files.profilePicture);
-    form.append("aadhaarCard", files.aadhaarCard);
-    form.append("panCard", files.panCard);
-    if (files.passport) form.append("passport", files.passport);
-
-    for (let cert of files.certificates) {
-      form.append("certificates", cert);
+    // Validation for required text fields
+    if (!formData.name || !formData.email || !formData.password || !formData.phoneNumber || 
+        !formData.address || !formData.experience || !formData.primaryCategory || 
+        !formData.specializedServices || !formData.keySkills || !formData.hourlyRate) {
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
     }
+
+    if (!formData.acceptedTerms) {
+      setError('You must accept the terms and conditions');
+      setLoading(false);
+      return;
+    }
+
+    // Prepare education data (matching model field name 'university')
+    const educationData = educationFields
+      .filter(field => field.qualification || field.university || field.fieldOfStudy || field.graduationYear)
+      .map(({ qualification, university, fieldOfStudy, graduationYear }) => 
+        ({ qualification, university, fieldOfStudy, graduationYear })
+      );
 
     try {
-      const response = await registerAsConsultant(form);
-      console.log("Submitted:", response.data);
-      alert("Application submitted!");
+      // Create form data for API
+      const submissionData = new FormData();
+      
+      // Add all text form fields first
+      Object.entries(formData).forEach(([key, val]) => {
+        if (key === 'keySkills') {
+          const skills = formData.keySkills.split(',').map(s => s.trim()).filter(s => s);
+          submissionData.append(key, JSON.stringify(skills));
+        } else if (key === 'specializedServices') {
+          const services = formData.specializedServices.split(',').map(s => s.trim()).filter(s => s);
+          submissionData.append(key, JSON.stringify(services));
+        } else if (key === 'languageProficiency') {
+          submissionData.append(key, JSON.stringify(formData.languageProficiency));
+        } else if (key !== 'education') {
+          submissionData.append(key, val);
+        }
+      });
+      
+      // Add education data
+      submissionData.append('education', JSON.stringify(educationData));
+      
+      // Debug logging
+      console.log('Files being uploaded:', {
+        profilePicture: files.profilePicture?.name,
+        resume: files.resume?.name,
+        aadhaarCard: files.aadhaarCard?.name,
+        panCard: files.panCard?.name,
+        passport: files.passport?.name,
+        certificates: files.certificates.length
+      });
+      
+      // Append files - Make sure files exist before appending
+      submissionData.append('profilePicture', files.profilePicture);
+      submissionData.append('resume', files.resume);
+      submissionData.append('aadhaarCard', files.aadhaarCard);
+      submissionData.append('panCard', files.panCard);
+      
+      // Append optional files
+      if (files.passport) {
+        submissionData.append('passport', files.passport);
+      }
+      
+      // Append certificates
+      files.certificates.forEach(file => {
+        submissionData.append('certificates', file);
+      });
+      
+      // Debug: Log FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of submissionData.entries()) {
+        console.log(key, value instanceof File ? `File: ${value.name}` : value);
+      }
+
+      const response = await registerAsConsultant(submissionData);
+      console.log('API Response:', response);
+      
+      if (response.status === 201) {
+        setSuccess(true);
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          phoneNumber: '',
+          address: '',
+          experience: '',
+          primaryCategory: '',
+          specializedServices: '',
+          keySkills: '',
+          languageProficiency: [],
+          availabilityPerWeek: 20,
+          hourlyRate: '',
+          preferredWorkingHours: '',
+          bookingLeadTime: '',
+          acceptedTerms: false,
+          visibleOnPlatform: false,
+          education: []
+        });
+        setFiles({
+          profilePicture: null,
+          resume: null,
+          aadhaarCard: null,
+          panCard: null,
+          passport: null,
+          certificates: []
+        });
+        setEducationFields([{ qualification: '', university: '', fieldOfStudy: '', graduationYear: '' }]);
+      } else {
+        setError('Unexpected response from server');
+      }
     } catch (err) {
-      console.error("Submission error:", err.response?.data || err);
-      alert("Submission failed.");
+      console.error('Submission error:', err);
+      setError(err.response?.data?.message || err.message || 'Submission failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="name" placeholder="Name" onChange={handleInputChange} required />
-      <input name="email" placeholder="Email" onChange={handleInputChange} required />
-      <input name="password" placeholder="Password" type="password" onChange={handleInputChange} required />
-      <input name="phoneNumber" placeholder="Phone" onChange={handleInputChange} required />
-      <input name="address" placeholder="Address" onChange={handleInputChange} required />
-      <input name="experience" placeholder="Experience (years)" onChange={handleInputChange} required />
-      <input name="primaryCategory" placeholder="Primary Category" onChange={handleInputChange} required />
-      <input name="specializedServices" placeholder="Specialized Services (comma separated)" onChange={handleInputChange} />
-      <input name="keySkills" placeholder="Key Skills (comma separated)" onChange={handleInputChange} />
-      <input name="languageProficiency" placeholder="Languages (comma separated)" onChange={handleInputChange} />
-      <input name="availabilityPerWeek" placeholder="Availability / week" onChange={handleInputChange} />
-      <input name="hourlyRate" placeholder="Hourly Rate" onChange={handleInputChange} />
-      <input name="preferredWorkingHours" placeholder="Preferred Hours" onChange={handleInputChange} />
-      <input name="bookingLeadTime" placeholder="Booking Lead Time" onChange={handleInputChange} />
-      <label>
-        <input type="checkbox" name="acceptedTerms" onChange={handleInputChange} /> Accept Terms
-      </label>
-      <label>
-        <input type="checkbox" name="visibleOnPlatform" onChange={handleInputChange} /> Visible on Platform
-      </label>
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="flex justify-center items-center mb-8">
+        <div className="w-8 h-8 bg-green-500 rounded-full mr-2"></div>
+        <h1 className="text-2xl font-bold uppercase">Parrot Consult</h1>
+      </div>
 
-      {/* Education */}
-      {education.map((item, index) => (
-        <div key={index}>
-          <input placeholder="Qualification" value={item.qualification} onChange={(e) => handleEducationChange(index, "qualification", e.target.value)} />
-          <input placeholder="University" value={item.university} onChange={(e) => handleEducationChange(index, "university", e.target.value)} />
-          <input placeholder="Field of Study" value={item.fieldOfStudy} onChange={(e) => handleEducationChange(index, "fieldOfStudy", e.target.value)} />
-          <input placeholder="Graduation Year" value={item.graduationYear} onChange={(e) => handleEducationChange(index, "graduationYear", e.target.value)} />
+      <h2 className="text-4xl font-bold text-center mb-8">Become a Consultant</h2>
+
+      <div className="space-y-8">
+        {/* Basic Details */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Basic Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                className="w-full border rounded p-2"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                className="w-full border rounded p-2"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="tel"
+                name="phoneNumber"
+                placeholder="Phone Number"
+                className="w-full border rounded p-2"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                className="w-full border rounded p-2"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="md:col-span-2">
+              <textarea
+                name="address"
+                placeholder="Complete Address"
+                className="w-full border rounded p-2"
+                rows={3}
+                value={formData.address}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer">
+              <span className="mr-2">📷 Upload Profile Picture *</span>
+              <input
+                type="file"
+                name="profilePicture"
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+                required
+              />
+            </label>
+            {files.profilePicture && (
+              <span className="ml-2 text-sm text-green-600">✓ {files.profilePicture.name}</span>
+            )}
+          </div>
         </div>
-      ))}
-      <button type="button" onClick={addEducationField}>+ Add Education</button>
 
-      {/* File Inputs */}
-      <input type="file" name="resume" onChange={handleFileChange} required />
-      <input type="file" name="profilePicture" onChange={handleFileChange} required />
-      <input type="file" name="aadhaarCard" onChange={handleFileChange} required />
-      <input type="file" name="panCard" onChange={handleFileChange} required />
-      <input type="file" name="passport" onChange={handleFileChange} />
-      <input type="file" name="certificates" onChange={handleFileChange} multiple />
+        {/* Professional Summary */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Professional Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <input
+                type="number"
+                placeholder="Years of Experience"
+                className="w-full border rounded p-2"
+                name="experience"
+                value={formData.experience}
+                onChange={handleInputChange}
+                required
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
+                <span className="mr-2">📄 Upload CV / Resume *</span>
+                <input
+                  type="file"
+                  name="resume"
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  required
+                />
+              </label>
+              {files.resume && (
+                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.resume.name}</span>
+              )}
+            </div>
+          </div>
+        </div>
 
-      <button type="submit">Submit for Review</button>
-    </form>
+        {/* Consulting Categories */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Consulting Categories</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <select
+                name="primaryCategory"
+                className="w-full border rounded p-2"
+                value={formData.primaryCategory}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Primary Consulting Category</option>
+                <option value="business">Business Strategy</option>
+                <option value="it">Information Technology</option>
+                <option value="marketing">Marketing & Sales</option>
+                <option value="finance">Finance & Accounting</option>
+                <option value="hr">Human Resources</option>
+                <option value="legal">Legal Advisory</option>
+              </select>
+            </div>
+            <div>
+              <input
+                type="text"
+                name="specializedServices"
+                placeholder="Specialized Services (comma separated)"
+                className="w-full border rounded p-2"
+                value={formData.specializedServices}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Education Details */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Education Details</h3>
+          {educationFields.map((field, index) => (
+            <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 border rounded">
+              <div>
+                <select
+                  className="w-full border rounded p-2"
+                  value={field.qualification}
+                  onChange={(e) => handleEducationChange(index, 'qualification', e.target.value)}
+                >
+                  <option value="">Highest Qualification</option>
+                  <option value="bachelor">Bachelor's Degree</option>
+                  <option value="master">Master's Degree</option>
+                  <option value="phd">PhD</option>
+                  <option value="diploma">Diploma</option>
+                  <option value="certificate">Certificate</option>
+                </select>
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="University / Institution Name"
+                  className="w-full border rounded p-2"
+                  value={field.university}
+                  onChange={(e) => handleEducationChange(index, 'university', e.target.value)}
+                />
+              </div>
+              <div>
+                <select
+                  className="w-full border rounded p-2"
+                  value={field.fieldOfStudy}
+                  onChange={(e) => handleEducationChange(index, 'fieldOfStudy', e.target.value)}
+                >
+                  <option value="">Field of Study</option>
+                  <option value="business">Business Administration</option>
+                  <option value="cs">Computer Science</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="finance">Finance</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="medicine">Medicine</option>
+                  <option value="law">Law</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Graduation Year"
+                  className="w-full border rounded p-2"
+                  value={field.graduationYear}
+                  onChange={(e) => handleEducationChange(index, 'graduationYear', e.target.value)}
+                />
+              </div>
+            </div>
+          ))}
+          <button 
+            type="button" 
+            onClick={addEducationField}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            + Add another education
+          </button>
+        </div>
+
+        {/* Skills & Certifications */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Skills & Certifications</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <input
+                type="text"
+                name="keySkills"
+                placeholder="Key Skills (comma separated)"
+                className="w-full border rounded p-2"
+                value={formData.keySkills}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div>
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
+                <span className="mr-2">📄 Upload Certificates (Multiple files allowed)</span>
+                <input
+                  type="file"
+                  name="certificates"
+                  onChange={handleFileChange}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="hidden"
+                  multiple
+                />
+              </label>
+              {files.certificates.length > 0 && (
+                <div className="text-sm text-green-600 mt-2">
+                  ✓ {files.certificates.length} certificate(s) selected
+                </div>
+              )}
+            </div>
+            <div>
+              <select
+                name="languageProficiency"
+                className="w-full border rounded p-2"
+                value={formData.languageProficiency}
+                onChange={(e) => {
+                  const options = e.target.options;
+                  const selected = [];
+                  for (let i = 0; i < options.length; i++) {
+                    if (options[i].selected) {
+                      selected.push(options[i].value);
+                    }
+                  }
+                  setFormData(prev => ({ ...prev, languageProficiency: selected }));
+                }}
+                multiple
+              >
+                <option value="">Language Proficiency (Hold Ctrl/Cmd for multiple)</option>
+                <option value="english">English</option>
+                <option value="hindi">Hindi</option>
+                <option value="spanish">Spanish</option>
+                <option value="french">French</option>
+                <option value="mandarin">Mandarin</option>
+                <option value="german">German</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Availability & Pricing */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Availability & Pricing</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div className="flex items-center">
+                <label className="w-full">
+                  <span className="block mb-2">Availability Hours per Week</span>
+                  <input
+                    type="range"
+                    name="availabilityPerWeek"
+                    min="1"
+                    max="40"
+                    value={formData.availabilityPerWeek}
+                    onChange={handleInputChange}
+                    className="w-full"
+                  />
+                  <div className="text-center">{formData.availabilityPerWeek} hours</div>
+                </label>
+              </div>
+            </div>
+            <div>
+              <input
+                type="number"
+                name="hourlyRate"
+                placeholder="Hourly Rate (₹)"
+                className="w-full border rounded p-2"
+                value={formData.hourlyRate}
+                onChange={handleInputChange}
+                required
+                min="0"
+              />
+            </div>
+            <div>
+              <select
+                name="preferredWorkingHours"
+                className="w-full border rounded p-2"
+                value={formData.preferredWorkingHours}
+                onChange={handleInputChange}
+              >
+                <option value="">Preferred Working Hours</option>
+                <option value="morning">Morning (6AM - 12PM)</option>
+                <option value="afternoon">Afternoon (12PM - 6PM)</option>
+                <option value="evening">Evening (6PM - 12AM)</option>
+                <option value="night">Night (12AM - 6AM)</option>
+                <option value="flexible">Flexible</option>
+              </select>
+            </div>
+            <div>
+              <select
+                name="bookingLeadTime"
+                className="w-full border rounded p-2"
+                value={formData.bookingLeadTime}
+                onChange={handleInputChange}
+              >
+                <option value="">Booking Lead Time</option>
+                <option value="1">1 day</option>
+                <option value="2">2 days</option>
+                <option value="3">3 days</option>
+                <option value="5">5 days</option>
+                <option value="7">1 week</option>
+                <option value="14">2 weeks</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Verification & Documents */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Document Verification (Required)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
+                <span className="mr-2">📄 Upload Aadhaar Card *</span>
+                <input
+                  type="file"
+                  name="aadhaarCard"
+                  onChange={handleFileChange}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="hidden"
+                  required
+                />
+              </label>
+              {files.aadhaarCard && (
+                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.aadhaarCard.name}</span>
+              )}
+            </div>
+            <div>
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
+                <span className="mr-2">📄 Upload PAN Card *</span>
+                <input
+                  type="file"
+                  name="panCard"
+                  onChange={handleFileChange}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="hidden"
+                  required
+                />
+              </label>
+              {files.panCard && (
+                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.panCard.name}</span>
+              )}
+            </div>
+            <div className="md:col-span-2">
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
+                <span className="mr-2">📄 Upload Passport (Optional)</span>
+                <input
+                  type="file"
+                  name="passport"
+                  onChange={handleFileChange}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="hidden"
+                />
+              </label>
+              {files.passport && (
+                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.passport.name}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Terms and Agreements */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Terms & Agreements</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="acceptedTerms"
+                  checked={formData.acceptedTerms}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                  required
+                />
+                <span>I Accept Consultant Terms & Conditions *</span>
+              </label>
+            </div>
+            
+            <div>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="visibleOnPlatform"
+                  checked={formData.visibleOnPlatform}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                <span>Consent for Profile Visibility on Platform</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Feedback Messages */}
+        {error && <div className="text-red-600 text-center p-4 bg-red-50 rounded">{error}</div>}
+        {success && <div className="text-green-600 text-center p-4 bg-green-50 rounded">Application submitted successfully! You will be notified once your application is reviewed.</div>}
+
+        {/* Submit Button */}
+        <div className="flex justify-center">
+          <button 
+            type="button" 
+            onClick={handleSubmit}
+            className="px-8 py-3 bg-blue-900 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
+            disabled={loading}
+          >
+            {loading ? 'Submitting...' : 'Submit for Review'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
