@@ -68,7 +68,7 @@ export const registerAdmin = asyncHandler(async (req, res) => {
 // admin login controller
 
 export const loginAdmin = asyncHandler(async (req, res) => {
-  const { email , password , phoneNumber } = req.body;
+  const { email, password, phoneNumber } = req.body;
 
   if ((!email && !phoneNumber) || !password) {
     throw new ApiError(400, "email/Username and Password are required");
@@ -138,14 +138,18 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Admin logged out successfully"));
 });
 
-
 // admin see list of unapproved consultants
 export const unapprovedConsultants = asyncHandler(async (req, res) => {
   const consultants = await Consultant.find({ isApproved: false });
   return res.status(200).json(new ApiResponse(200, consultants));
-})
+});
 
-// admin approve consultant 
+export const approvedConsultants = asyncHandler(async (req, res) => {
+  const consultants = await Consultant.find({ isApproved: true });
+  return res.status(200).json(new ApiResponse(200, consultants));
+});
+
+// admin approve consultant
 export const approveConsultant = asyncHandler(async (req, res) => {
   const { consultantId } = req.params;
   const consultant = await Consultant.findById(consultantId);
@@ -156,28 +160,28 @@ export const approveConsultant = asyncHandler(async (req, res) => {
   consultant.status = "approved";
   await consultant.save();
 
-
-    // Send approval email
-    try {
-      await sendEmail({
-        to: consultant.email,
-        subject: "Consultant Application Approved 🎉",
-        text: `Dear ${consultant.name},\n\nCongratulations! Your consultant application has been approved.\n\nYou can now log in and start using our platform.\n\nBest Regards,\nParrot Consulting Team`,
-        html: `<p>Dear <b>${consultant.name}</b>,</p>
+  // Send approval email
+  try {
+    await sendEmail({
+      to: consultant.email,
+      subject: "Consultant Application Approved 🎉",
+      text: `Dear ${consultant.name},\n\nCongratulations! Your consultant application has been approved.\n\nYou can now log in and start using our platform.\n\nBest Regards,\nParrot Consulting Team`,
+      html: `<p>Dear <b>${consultant.name}</b>,</p>
                <p>🎉 Congratulations! Your consultant application has been <span style="color:green;">approved</span>.</p>
                <p>You can now log in and start using our platform.</p>
                <p>Best Regards,<br/>Parrot Consulting Team</p>`,
-      });
-    } catch (error) {
-      console.error("Error sending approval email:", error);
-      // You may log this or use a fallback
-    }
+    });
+  } catch (error) {
+    console.error("Error sending approval email:", error);
+    // You may log this or use a fallback
+  }
 
-    
-  return res.status(200).json(new ApiResponse(200, consultant , "Consultant approved successfully"));
-})
+  return res
+    .status(200)
+    .json(new ApiResponse(200, consultant, "Consultant approved successfully"));
+});
 
-// admin reject consultant 
+// admin reject consultant
 export const rejectConsultant = asyncHandler(async (req, res) => {
   const { consultantId } = req.params;
 
@@ -202,7 +206,7 @@ export const rejectConsultant = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Consultant rejected and deleted successfully"));
+    .json(
+      new ApiResponse(200, null, "Consultant rejected and deleted successfully")
+    );
 });
-
-

@@ -8,6 +8,9 @@ import Home from "./pages/Home";
 // import ClientDashboard from './pages/ClientDashboard';
 import ConsultantProfile from "./pages/ConsultantProfile";
 import ConsultantApplicationForm from "./forms/consultantApplicationform";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLoginForm from "./forms/adminRegistrationLogin";
+import PrivateRoute from "./routes/ProtectedRoutes";
 // import AdminDashboard from './pages/AdminDashboard';
 // import PendingConsultants from './pages/PendingConsultants';
 
@@ -15,6 +18,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/adminsecuredlogin" element={<AdminLoginForm />} />
       {/* <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} /> */}
 
@@ -28,7 +32,17 @@ const App = () => {
       {/* Admin routes */}
       {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/pending-consultants" element={<PendingConsultants />} /> */}
-        <Route path="/admin/application-form" element={<ConsultantApplicationForm />} />
+        <Route path="/application-form" element={<ConsultantApplicationForm />} />
+
+        <Route
+          path="/admindashboard"
+          element={
+            <PrivateRoute allowedRole="admin">
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        
     </Routes>
   );
 };

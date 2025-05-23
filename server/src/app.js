@@ -20,7 +20,10 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN
 }));
 
-app.use(express.static('public'));
+
+console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN); // Debug this
+
+// app.use(express.static('public'));
 
 app.use(express.urlencoded({
     extended: true,
