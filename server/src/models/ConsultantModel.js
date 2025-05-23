@@ -45,6 +45,10 @@ const consultantSchema = new mongoose.Schema(
       required: true,
     },
 
+    refreshToken:{
+      type: String
+    },
+
     // category
 
     primaryCategory: String,
