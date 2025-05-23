@@ -9,7 +9,7 @@ export default function Navbar() {
   const [showForm, setShowForm] = useState(false);
   return (
     <>
-      <nav className="py-4 px-6 flex items-center justify-between bg-white shadow-sm">
+      <nav className="py-4 px-6 flex items-center justify-between bg-amber-100 shadow-sm">
         <div className="flex items-center">
           <Logo />
           <div className="ml-12 hidden md:flex space-x-6">
