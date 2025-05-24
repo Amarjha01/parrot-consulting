@@ -143,7 +143,7 @@ export const unapprovedConsultants = asyncHandler(async (req, res) => {
   const consultants = await Consultant.find({ isApproved: false });
   return res.status(200).json(new ApiResponse(200, consultants));
 });
-
+// admin see list of approved consultants
 export const approvedConsultants = asyncHandler(async (req, res) => {
   const consultants = await Consultant.find({ isApproved: true });
   return res.status(200).json(new ApiResponse(200, consultants));

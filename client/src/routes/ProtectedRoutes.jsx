@@ -3,20 +3,28 @@ import { Navigate } from "react-router-dom";
 const PrivateRoute = ({ children, allowedRole }) => {
   const admin = JSON.parse(localStorage.getItem("admin"));
   const consultant = JSON.parse(localStorage.getItem("consultant"));
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  if (allowedRole === "admin" && admin) {
+  const isAuthorized = {
+    admin: !!admin,
+    consultant: !!consultant,
+    user: !!user,
+  };
+
+  if (isAuthorized[allowedRole]) {
     return children;
   }
 
-  if (allowedRole === "consultant" && consultant) {
-    return children;
+  // Role-based redirection
+  switch (allowedRole) {
+    case "admin":
+      return <Navigate to="/adminsecuredlogin" />;
+    case "consultant":
+    case "user":
+      return <Navigate to="/" />;
+    default:
+      return <Navigate to="/" />;
   }
-  if (allowedRole === "user" && user) {
-    return children;
-  }
-
-  // If neither match, redirect to login
-  return <Navigate to="/adminsecuredlogin" />;
 };
 
 export default PrivateRoute;

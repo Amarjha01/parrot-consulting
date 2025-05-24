@@ -6,14 +6,13 @@ const API = axios.create({
   // withCredentials: true, // ✅ This sends cookies with every request
 });
 
-
-
-
 export const registerAsConsultant = (formdata) => {
-    return API.post("/consultant/registerasconsultant", formdata, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-  };
-  
+  return API.post("/consultant/registerasconsultant", formdata, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const loginAsConsultant = (formdata) =>
+  API.post("/consultant/loginconsultant", formdata); // ✅ loginAsConsultant

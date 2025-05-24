@@ -21,16 +21,14 @@ export const loginAsAdmin = (formdata) => {
   });
 };
 
-
 export const logout = async () => {
-    try {
-      const response = await API.post("/admin/logoutadmin");
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  };
-
+  try {
+    const response = await API.post("/admin/logoutadmin");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
 
 export const getallunapprovedconsultants = async () => {
   try {
@@ -41,21 +39,22 @@ export const getallunapprovedconsultants = async () => {
   }
 };
 
-
-
 export const adminapproveconsultant = async (consultantId) => {
   try {
-    const response = await API.post(`/admin/adminapproveconsultant/${consultantId}`);
+    const response = await API.post(
+      `/admin/adminapproveconsultant/${consultantId}`
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
   }
 };
 
-
 export const adminrejectconsultant = async (consultantId) => {
   try {
-    const response = await API.post(`/admin/adminrejectconsultant/${consultantId}`);
+    const response = await API.post(
+      `/admin/adminrejectconsultant/${consultantId}`
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data || error;

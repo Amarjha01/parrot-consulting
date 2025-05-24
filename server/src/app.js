@@ -37,11 +37,13 @@ app.use(express.urlencoded({
 
 import ConsultantRouter from './routes/consultant.Routes.js';
 import AdminRouter from './routes/Admin.Routes.js';
-
-
+import GlobalRouter from './routes/Global.Routes.js';
+import userRouter from './routes/User.Routes.js';
 
 
 // using routes
 app.use('/api/v1/consultant', ConsultantRouter);
 app.use('/api/v1/admin', AdminRouter);
+app.use('/api/v1/global', GlobalRouter);
+app.use('/api/v1/user', userRouter);
 export default app;

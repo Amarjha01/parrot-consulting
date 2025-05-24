@@ -11,6 +11,7 @@ import ConsultantApplicationForm from "./forms/consultantApplicationform";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLoginForm from "./forms/adminRegistrationLogin";
 import PrivateRoute from "./routes/ProtectedRoutes";
+import UserDashboard from "./pages/ClientDashboard";
 // import AdminDashboard from './pages/AdminDashboard';
 // import PendingConsultants from './pages/PendingConsultants';
 
@@ -39,6 +40,14 @@ const App = () => {
           element={
             <PrivateRoute allowedRole="admin">
               <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/userdashboard"
+          element={
+            <PrivateRoute allowedRole="user">
+              <UserDashboard />
             </PrivateRoute>
           }
         />

@@ -1,7 +1,7 @@
 import { upload } from "../middlewares/multer.js";
 import { Consultant } from "../models/ConsultantModel.js";
 import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/Apiresponse.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { uploadOnCloudinary } from "../utils/clodinary.js";
 
@@ -23,6 +23,9 @@ const genrateAccessTokenAndRefreshToken = async (consultantId) => {
   }
 };
 
+
+
+// register consultant 
 export const ApplyAsconsultant = asyncHandler(async (req, res) => {
   const {
     name,
@@ -162,3 +165,49 @@ if (!cv?.url) {
       )
     );
 });
+
+
+
+//login consultant only if approved 
+export const loginAsConsultant = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const consultant = await Consultant.findOne({ email });
+
+  if (!consultant) {
+    throw new ApiError(404, "Consultant not found");
+  }
+
+  if (!consultant.comparePassword(password)) {
+    throw new ApiError(401, "Invalid Password");
+  }
+
+  if (!consultant.isApproved) {
+    throw new ApiError(401, "Consultant is not approved yet try again later ");
+  }
+
+  const { accessToken, refreshToken } = await genrateAccessTokenAndRefreshToken(
+    consultant._id
+  );
+
+  const loggedinConsultant = await Consultant.findById(consultant._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!loggedinConsultant) {
+    throw new ApiError(500, "Something went wrong while logging consultant");
+  }
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(new ApiResponse(200, loggedinConsultant));
+  
+})
