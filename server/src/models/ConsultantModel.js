@@ -45,8 +45,8 @@ const consultantSchema = new mongoose.Schema(
       required: true,
     },
 
-    refreshToken:{
-      type: String
+    refreshToken: {
+      type: String,
     },
 
     // category
@@ -65,10 +65,37 @@ const consultantSchema = new mongoose.Schema(
     languageProficiency: [String],
 
     // Availability & Pricing
-    availabilityPerWeek: Number,
+    // Availability & Pricing
     hourlyRate: Number,
-    preferredWorkingHours: String,
     bookingLeadTime: String,
+
+    weeklyAvailability: [
+      {
+        day: {
+          type: String,
+          enum: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          required: true,
+        },
+        isActive: {
+          type: Boolean,
+          default: false,
+        },
+        timeSlots: [
+          {
+            start: { type: String, required: true }, // "09:00"
+            end: { type: String, required: true }, // "12:00"
+          },
+        ],
+      },
+    ],
 
     // Agreements
     acceptedTerms: { type: Boolean, default: false },
@@ -103,13 +130,13 @@ const consultantSchema = new mongoose.Schema(
 
     // Education (referenced)
     education: [
-        {
-          qualification: String,
-          university: String,
-          fieldOfStudy: String,
-          graduationYear: String
-        }
-      ]
+      {
+        qualification: String,
+        university: String,
+        fieldOfStudy: String,
+        graduationYear: String,
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -121,15 +148,12 @@ consultantSchema.pre("save", async function (next) {
   next();
 });
 
-
 consultantSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
-}
-
-
+};
 
 consultantSchema.methods.genrateAccessToken = function () {
- return jwt.sign(
+  return jwt.sign(
     {
       _id: this._id,
       name: this.name,
@@ -139,10 +163,8 @@ consultantSchema.methods.genrateAccessToken = function () {
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1h" }
-
- )
+  );
 };
-
 
 consultantSchema.methods.genrateRefreshToken = function () {
   return jwt.sign(

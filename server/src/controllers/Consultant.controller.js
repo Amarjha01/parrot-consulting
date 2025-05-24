@@ -23,9 +23,7 @@ const genrateAccessTokenAndRefreshToken = async (consultantId) => {
   }
 };
 
-
-
-// register consultant 
+// register consultant
 export const ApplyAsconsultant = asyncHandler(async (req, res) => {
   const {
     name,
@@ -62,9 +60,9 @@ export const ApplyAsconsultant = asyncHandler(async (req, res) => {
   }
 
   const cv = await uploadOnCloudinary(resumeFile.path);
-if (!cv?.url) {
-  return res.status(400).json({ message: "Failed to upload resume" });
-}
+  if (!cv?.url) {
+    return res.status(400).json({ message: "Failed to upload resume" });
+  }
 
   if (!req.files?.panCard?.[0]) {
     return res.status(400).json({ message: "PAN📞 Card file is missing" });
@@ -114,7 +112,9 @@ if (!cv?.url) {
     ? education
     : JSON.parse(education || "[]");
 
-  // TODO: hash password here if not done already
+  const weeklyAvailabilityArray = Array.isArray(req.body.weeklyAvailability)
+    ? req.body.weeklyAvailability
+    : JSON.parse(req.body.weeklyAvailability || "[]");
 
   const consultant = await Consultant.create({
     name,
@@ -136,6 +136,7 @@ if (!cv?.url) {
     bookingLeadTime,
     acceptedTerms,
     visibleOnPlatform,
+    weeklyAvailability: weeklyAvailabilityArray,
     documents: {
       aadhaarCard: docs.aadhaarCard?.url,
       panCard: docs.panCard?.url,
@@ -166,9 +167,7 @@ if (!cv?.url) {
     );
 });
 
-
-
-//login consultant only if approved 
+//login consultant only if approved
 export const loginAsConsultant = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -209,5 +208,4 @@ export const loginAsConsultant = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(new ApiResponse(200, loggedinConsultant));
-  
-})
+});

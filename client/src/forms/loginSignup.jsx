@@ -47,10 +47,14 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
       } else if (authMode === 'login' || authMode === 'consultantLogin') {
         const loginFunction = authMode === 'login' ? loginAsUser : loginAsConsultant;
         const response = await loginFunction(formData);
+        console.log("API response:", response);
   
-      
-        const userData = response.data?.status;
-        const role = userData?.role?.toLowerCase();
+        // Extract user data depending on auth mode
+        const userData = authMode === 'login' 
+          ? response.data?.status 
+          : response.data?.data;
+  
+        const role = userData?.role?.toLowerCase(); // handles both login types
   
         console.log("Extracted role:", role);
         console.log("User data to store:", userData);
@@ -60,20 +64,16 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
           return;
         }
   
-        // ✅ Clear previous roles
+        // Clear previous roles
         localStorage.removeItem("admin");
         localStorage.removeItem("consultant");
         localStorage.removeItem("user");
   
-        // ✅ Save role and redirect
+        // Save role and redirect
         switch (role) {
-          // case 'admin':
-          //   localStorage.setItem("admin", JSON.stringify(userData));
-          //   navigate('/admindashboard');
-          //   break;
           case 'consultant':
             localStorage.setItem("consultant", JSON.stringify(userData));
-            navigate('/consultant/dashboard');
+            navigate('/ConsultantDashboard');
             break;
           case 'user':
             localStorage.setItem("user", JSON.stringify(userData));

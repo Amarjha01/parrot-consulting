@@ -1,25 +1,25 @@
-import { useState } from 'react';
-import { registerAsConsultant } from '../service/consultantApi.js';
+import { useState } from "react";
+import { registerAsConsultant } from "../service/consultantApi.js";
 
 export default function ConsultantApplicationForm() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phoneNumber: '',
-    address: '',
-    experience: '',
-    primaryCategory: '',
-    specializedServices: '',
-    keySkills: '',
+    name: "",
+    email: "",
+    password: "",
+    phoneNumber: "",
+    address: "",
+    experience: "",
+    primaryCategory: "",
+    specializedServices: "",
+    keySkills: "",
     languageProficiency: [],
     availabilityPerWeek: 20,
-    hourlyRate: '',
-    preferredWorkingHours: '',
-    bookingLeadTime: '',
+    hourlyRate: "",
+    preferredWorkingHours: "",
+    bookingLeadTime: "",
     acceptedTerms: false,
     visibleOnPlatform: false,
-    education: []
+    education: [],
   });
 
   const [files, setFiles] = useState({
@@ -28,36 +28,80 @@ export default function ConsultantApplicationForm() {
     aadhaarCard: null,
     panCard: null,
     passport: null,
-    certificates: []
+    certificates: [],
   });
 
   const [educationFields, setEducationFields] = useState([
-    { qualification: '', university: '', fieldOfStudy: '', graduationYear: '' }
+    { qualification: "", university: "", fieldOfStudy: "", graduationYear: "" },
   ]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  const daysOfWeek = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  const defaultAvailability = daysOfWeek.map((day) => ({
+    day,
+    isActive: false,
+    timeSlots: [],
+  }));
+
+  const [weeklyAvailability, setWeeklyAvailability] =
+    useState(defaultAvailability);
+
+  const handleToggleDay = (index) => {
+    const updated = [...weeklyAvailability];
+    updated[index].isActive = !updated[index].isActive;
+    if (!updated[index].isActive) updated[index].timeSlots = [];
+    setWeeklyAvailability(updated);
+  };
+
+  const handleTimeChange = (index, slotIndex, field, value) => {
+    const updated = [...weeklyAvailability];
+    updated[index].timeSlots[slotIndex][field] = value;
+    setWeeklyAvailability(updated);
+  };
+
+  const addTimeSlot = (index) => {
+    const updated = [...weeklyAvailability];
+    updated[index].timeSlots.push({ start: "", end: "" });
+    setWeeklyAvailability(updated);
+  };
+
+  const removeTimeSlot = (index, slotIndex) => {
+    const updated = [...weeklyAvailability];
+    updated[index].timeSlots.splice(slotIndex, 1);
+    setWeeklyAvailability(updated);
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleFileChange = (e) => {
     const { name, files: uploadedFiles } = e.target;
-    if (name === 'certificates') {
-      setFiles(prev => ({
+    if (name === "certificates") {
+      setFiles((prev) => ({
         ...prev,
-        certificates: [...prev.certificates, ...uploadedFiles]
+        certificates: [...prev.certificates, ...uploadedFiles],
       }));
     } else {
-      setFiles(prev => ({
+      setFiles((prev) => ({
         ...prev,
-        [name]: uploadedFiles[0]
+        [name]: uploadedFiles[0],
       }));
     }
   };
@@ -69,7 +113,15 @@ export default function ConsultantApplicationForm() {
   };
 
   const addEducationField = () => {
-    setEducationFields(prev => [...prev, { qualification: '', university: '', fieldOfStudy: '', graduationYear: '' }]);
+    setEducationFields((prev) => [
+      ...prev,
+      {
+        qualification: "",
+        university: "",
+        fieldOfStudy: "",
+        graduationYear: "",
+      },
+    ]);
   };
 
   const handleSubmit = async (e) => {
@@ -80,126 +132,155 @@ export default function ConsultantApplicationForm() {
 
     // Validation for required files
     if (!files.profilePicture) {
-      setError('Profile picture is required');
+      setError("Profile picture is required");
       setLoading(false);
       return;
     }
     if (!files.resume) {
-      setError('Resume is required');
+      setError("Resume is required");
       setLoading(false);
       return;
     }
     if (!files.aadhaarCard) {
-      setError('Aadhaar Card is required');
+      setError("Aadhaar Card is required");
       setLoading(false);
       return;
     }
     if (!files.panCard) {
-      setError('PAN Card is required');
+      setError("PAN Card is required");
       setLoading(false);
       return;
     }
 
     // Validation for required text fields
-    if (!formData.name || !formData.email || !formData.password || !formData.phoneNumber || 
-        !formData.address || !formData.experience || !formData.primaryCategory || 
-        !formData.specializedServices || !formData.keySkills || !formData.hourlyRate) {
-      setError('Please fill in all required fields');
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.phoneNumber ||
+      !formData.address ||
+      !formData.experience ||
+      !formData.primaryCategory ||
+      !formData.specializedServices ||
+      !formData.keySkills ||
+      !formData.hourlyRate
+    ) {
+      setError("Please fill in all required fields");
       setLoading(false);
       return;
     }
 
     if (!formData.acceptedTerms) {
-      setError('You must accept the terms and conditions');
+      setError("You must accept the terms and conditions");
       setLoading(false);
       return;
     }
 
     // Prepare education data (matching model field name 'university')
     const educationData = educationFields
-      .filter(field => field.qualification || field.university || field.fieldOfStudy || field.graduationYear)
-      .map(({ qualification, university, fieldOfStudy, graduationYear }) => 
-        ({ qualification, university, fieldOfStudy, graduationYear })
-      );
+      .filter(
+        (field) =>
+          field.qualification ||
+          field.university ||
+          field.fieldOfStudy ||
+          field.graduationYear
+      )
+      .map(({ qualification, university, fieldOfStudy, graduationYear }) => ({
+        qualification,
+        university,
+        fieldOfStudy,
+        graduationYear,
+      }));
 
     try {
       // Create form data for API
       const submissionData = new FormData();
-      
+
       // Add all text form fields first
       Object.entries(formData).forEach(([key, val]) => {
-        if (key === 'keySkills') {
-          const skills = formData.keySkills.split(',').map(s => s.trim()).filter(s => s);
+        if (key === "keySkills") {
+          const skills = formData.keySkills
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s);
           submissionData.append(key, JSON.stringify(skills));
-        } else if (key === 'specializedServices') {
-          const services = formData.specializedServices.split(',').map(s => s.trim()).filter(s => s);
+        } else if (key === "specializedServices") {
+          const services = formData.specializedServices
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s);
           submissionData.append(key, JSON.stringify(services));
-        } else if (key === 'languageProficiency') {
-          submissionData.append(key, JSON.stringify(formData.languageProficiency));
-        } else if (key !== 'education') {
+        } else if (key === "languageProficiency") {
+          submissionData.append(
+            key,
+            JSON.stringify(formData.languageProficiency)
+          );
+        } else if (key !== "education") {
           submissionData.append(key, val);
         }
       });
-      
+      submissionData.append('weeklyAvailability', JSON.stringify(weeklyAvailability));
+      console.log("Final weeklyAvailability before submit:", weeklyAvailability);
+
       // Add education data
-      submissionData.append('education', JSON.stringify(educationData));
-      
+      submissionData.append("education", JSON.stringify(educationData));
+
       // Debug logging
-      console.log('Files being uploaded:', {
+      console.log("Files being uploaded:", {
         profilePicture: files.profilePicture?.name,
         resume: files.resume?.name,
         aadhaarCard: files.aadhaarCard?.name,
         panCard: files.panCard?.name,
         passport: files.passport?.name,
-        certificates: files.certificates.length
+        certificates: files.certificates.length,
       });
-      
+
       // Append files - Make sure files exist before appending
-      submissionData.append('profilePicture', files.profilePicture);
-      submissionData.append('resume', files.resume);
-      submissionData.append('aadhaarCard', files.aadhaarCard);
-      submissionData.append('panCard', files.panCard);
-      
+      submissionData.append("profilePicture", files.profilePicture);
+      submissionData.append("resume", files.resume);
+      submissionData.append("aadhaarCard", files.aadhaarCard);
+      submissionData.append("panCard", files.panCard);
+
       // Append optional files
       if (files.passport) {
-        submissionData.append('passport', files.passport);
+        submissionData.append("passport", files.passport);
       }
-      
+
       // Append certificates
-      files.certificates.forEach(file => {
-        submissionData.append('certificates', file);
+      files.certificates.forEach((file) => {
+        submissionData.append("certificates", file);
       });
-      
+
       // Debug: Log FormData contents
-      console.log('FormData contents:');
+      console.log("FormData contents:");
       for (let [key, value] of submissionData.entries()) {
         console.log(key, value instanceof File ? `File: ${value.name}` : value);
       }
 
       const response = await registerAsConsultant(submissionData);
-      console.log('API Response:', response);
-      
+      console.log("API Response:", response);
+
       if (response.status === 201) {
         setSuccess(true);
         // Reset form
         setFormData({
-          name: '',
-          email: '',
-          password: '',
-          phoneNumber: '',
-          address: '',
-          experience: '',
-          primaryCategory: '',
-          specializedServices: '',
-          keySkills: '',
+          name: "",
+          email: "",
+          password: "",
+          phoneNumber: "",
+          address: "",
+          experience: "",
+          primaryCategory: "",
+          specializedServices: "",
+          keySkills: "",
           languageProficiency: [],
           availabilityPerWeek: 20,
-          hourlyRate: '',
-          preferredWorkingHours: '',
-          bookingLeadTime: '',
+          hourlyRate: "",
+          preferredWorkingHours: "",
+          bookingLeadTime: "",
           acceptedTerms: false,
           visibleOnPlatform: false,
-          education: []
+          education: [],
         });
         setFiles({
           profilePicture: null,
@@ -207,15 +288,24 @@ export default function ConsultantApplicationForm() {
           aadhaarCard: null,
           panCard: null,
           passport: null,
-          certificates: []
+          certificates: [],
         });
-        setEducationFields([{ qualification: '', university: '', fieldOfStudy: '', graduationYear: '' }]);
+        setEducationFields([
+          {
+            qualification: "",
+            university: "",
+            fieldOfStudy: "",
+            graduationYear: "",
+          },
+        ]);
       } else {
-        setError('Unexpected response from server');
+        setError("Unexpected response from server");
       }
     } catch (err) {
-      console.error('Submission error:', err);
-      setError(err.response?.data?.message || err.message || 'Submission failed');
+      console.error("Submission error:", err);
+      setError(
+        err.response?.data?.message || err.message || "Submission failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -228,7 +318,9 @@ export default function ConsultantApplicationForm() {
         <h1 className="text-2xl font-bold uppercase">Parrot Consult</h1>
       </div>
 
-      <h2 className="text-4xl font-bold text-center mb-8">Become a Consultant</h2>
+      <h2 className="text-4xl font-bold text-center mb-8">
+        Become a Consultant
+      </h2>
 
       <div className="space-y-8">
         {/* Basic Details */}
@@ -304,7 +396,9 @@ export default function ConsultantApplicationForm() {
               />
             </label>
             {files.profilePicture && (
-              <span className="ml-2 text-sm text-green-600">✓ {files.profilePicture.name}</span>
+              <span className="ml-2 text-sm text-green-600">
+                ✓ {files.profilePicture.name}
+              </span>
             )}
           </div>
         </div>
@@ -338,7 +432,9 @@ export default function ConsultantApplicationForm() {
                 />
               </label>
               {files.resume && (
-                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.resume.name}</span>
+                <span className="block text-center text-sm text-green-600 mt-1">
+                  ✓ {files.resume.name}
+                </span>
               )}
             </div>
           </div>
@@ -383,12 +479,21 @@ export default function ConsultantApplicationForm() {
         <div>
           <h3 className="text-xl font-bold mb-4">Education Details</h3>
           {educationFields.map((field, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 border rounded">
+            <div
+              key={index}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 border rounded"
+            >
               <div>
                 <select
                   className="w-full border rounded p-2"
                   value={field.qualification}
-                  onChange={(e) => handleEducationChange(index, 'qualification', e.target.value)}
+                  onChange={(e) =>
+                    handleEducationChange(
+                      index,
+                      "qualification",
+                      e.target.value
+                    )
+                  }
                 >
                   <option value="">Highest Qualification</option>
                   <option value="bachelor">Bachelor's Degree</option>
@@ -404,14 +509,18 @@ export default function ConsultantApplicationForm() {
                   placeholder="University / Institution Name"
                   className="w-full border rounded p-2"
                   value={field.university}
-                  onChange={(e) => handleEducationChange(index, 'university', e.target.value)}
+                  onChange={(e) =>
+                    handleEducationChange(index, "university", e.target.value)
+                  }
                 />
               </div>
               <div>
                 <select
                   className="w-full border rounded p-2"
                   value={field.fieldOfStudy}
-                  onChange={(e) => handleEducationChange(index, 'fieldOfStudy', e.target.value)}
+                  onChange={(e) =>
+                    handleEducationChange(index, "fieldOfStudy", e.target.value)
+                  }
                 >
                   <option value="">Field of Study</option>
                   <option value="business">Business Administration</option>
@@ -430,13 +539,19 @@ export default function ConsultantApplicationForm() {
                   placeholder="Graduation Year"
                   className="w-full border rounded p-2"
                   value={field.graduationYear}
-                  onChange={(e) => handleEducationChange(index, 'graduationYear', e.target.value)}
+                  onChange={(e) =>
+                    handleEducationChange(
+                      index,
+                      "graduationYear",
+                      e.target.value
+                    )
+                  }
                 />
               </div>
             </div>
           ))}
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={addEducationField}
             className="text-sm text-blue-600 hover:underline"
           >
@@ -461,7 +576,9 @@ export default function ConsultantApplicationForm() {
             </div>
             <div>
               <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
-                <span className="mr-2">📄 Upload Certificates (Multiple files allowed)</span>
+                <span className="mr-2">
+                  📄 Upload Certificates (Multiple files allowed)
+                </span>
                 <input
                   type="file"
                   name="certificates"
@@ -490,11 +607,16 @@ export default function ConsultantApplicationForm() {
                       selected.push(options[i].value);
                     }
                   }
-                  setFormData(prev => ({ ...prev, languageProficiency: selected }));
+                  setFormData((prev) => ({
+                    ...prev,
+                    languageProficiency: selected,
+                  }));
                 }}
                 multiple
               >
-                <option value="">Language Proficiency (Hold Ctrl/Cmd for multiple)</option>
+                <option value="">
+                  Language Proficiency (Hold Ctrl/Cmd for multiple)
+                </option>
                 <option value="english">English</option>
                 <option value="hindi">Hindi</option>
                 <option value="spanish">Spanish</option>
@@ -505,6 +627,71 @@ export default function ConsultantApplicationForm() {
             </div>
           </div>
         </div>
+        {/* //////////////////////////////////////// */}
+        <div>
+          <h3 className="text-xl font-bold mb-4">Weekly Availability</h3>
+          {weeklyAvailability.map((day, index) => (
+            <div key={day.day} className="mb-4 border rounded p-4">
+              <label className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  checked={day.isActive}
+                  onChange={() => handleToggleDay(index)}
+                  className="mr-2"
+                />
+                <span className="font-semibold">{day.day}</span>
+              </label>
+              {day.isActive && (
+                <div className="space-y-2">
+                  {day.timeSlots.map((slot, slotIndex) => (
+                    <div key={slotIndex} className="flex space-x-2">
+                      <input
+                        type="time"
+                        value={slot.start}
+                        onChange={(e) =>
+                          handleTimeChange(
+                            index,
+                            slotIndex,
+                            "start",
+                            e.target.value
+                          )
+                        }
+                        className="border p-2 rounded"
+                      />
+                      <input
+                        type="time"
+                        value={slot.end}
+                        onChange={(e) =>
+                          handleTimeChange(
+                            index,
+                            slotIndex,
+                            "end",
+                            e.target.value
+                          )
+                        }
+                        className="border p-2 rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeTimeSlot(index, slotIndex)}
+                        className="text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addTimeSlot(index)}
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    + Add time slot
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
         {/* Availability & Pricing */}
         <div>
@@ -513,7 +700,9 @@ export default function ConsultantApplicationForm() {
             <div>
               <div className="flex items-center">
                 <label className="w-full">
-                  <span className="block mb-2">Availability Hours per Week</span>
+                  <span className="block mb-2">
+                    Availability Hours per Week
+                  </span>
                   <input
                     type="range"
                     name="availabilityPerWeek"
@@ -523,7 +712,9 @@ export default function ConsultantApplicationForm() {
                     onChange={handleInputChange}
                     className="w-full"
                   />
-                  <div className="text-center">{formData.availabilityPerWeek} hours</div>
+                  <div className="text-center">
+                    {formData.availabilityPerWeek} hours
+                  </div>
                 </label>
               </div>
             </div>
@@ -575,7 +766,9 @@ export default function ConsultantApplicationForm() {
 
         {/* Verification & Documents */}
         <div>
-          <h3 className="text-xl font-bold mb-4">Document Verification (Required)</h3>
+          <h3 className="text-xl font-bold mb-4">
+            Document Verification (Required)
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
@@ -590,7 +783,9 @@ export default function ConsultantApplicationForm() {
                 />
               </label>
               {files.aadhaarCard && (
-                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.aadhaarCard.name}</span>
+                <span className="block text-center text-sm text-green-600 mt-1">
+                  ✓ {files.aadhaarCard.name}
+                </span>
               )}
             </div>
             <div>
@@ -606,7 +801,9 @@ export default function ConsultantApplicationForm() {
                 />
               </label>
               {files.panCard && (
-                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.panCard.name}</span>
+                <span className="block text-center text-sm text-green-600 mt-1">
+                  ✓ {files.panCard.name}
+                </span>
               )}
             </div>
             <div className="md:col-span-2">
@@ -621,7 +818,9 @@ export default function ConsultantApplicationForm() {
                 />
               </label>
               {files.passport && (
-                <span className="block text-center text-sm text-green-600 mt-1">✓ {files.passport.name}</span>
+                <span className="block text-center text-sm text-green-600 mt-1">
+                  ✓ {files.passport.name}
+                </span>
               )}
             </div>
           </div>
@@ -644,7 +843,7 @@ export default function ConsultantApplicationForm() {
                 <span>I Accept Consultant Terms & Conditions *</span>
               </label>
             </div>
-            
+
             <div>
               <label className="flex items-center">
                 <input
@@ -661,18 +860,27 @@ export default function ConsultantApplicationForm() {
         </div>
 
         {/* Feedback Messages */}
-        {error && <div className="text-red-600 text-center p-4 bg-red-50 rounded">{error}</div>}
-        {success && <div className="text-green-600 text-center p-4 bg-green-50 rounded">Application submitted successfully! You will be notified once your application is reviewed.</div>}
+        {error && (
+          <div className="text-red-600 text-center p-4 bg-red-50 rounded">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="text-green-600 text-center p-4 bg-green-50 rounded">
+            Application submitted successfully! You will be notified once your
+            application is reviewed.
+          </div>
+        )}
 
         {/* Submit Button */}
         <div className="flex justify-center">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={handleSubmit}
-            className="px-8 py-3 bg-blue-900 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
+            className="px-8 py-3 bg-blue-900 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
-            {loading ? 'Submitting...' : 'Submit for Review'}
+            {loading ? "Submitting..." : "Submit for Review"}
           </button>
         </div>
       </div>

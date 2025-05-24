@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminLoginForm from "./forms/adminRegistrationLogin";
 import PrivateRoute from "./routes/ProtectedRoutes";
 import UserDashboard from "./pages/ClientDashboard";
+import ConsultantDashboard from "./pages/ConsultantDashboard";
 // import AdminDashboard from './pages/AdminDashboard';
 // import PendingConsultants from './pages/PendingConsultants';
 
@@ -48,6 +49,14 @@ const App = () => {
           element={
             <PrivateRoute allowedRole="user">
               <UserDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ConsultantDashboard"
+          element={
+            <PrivateRoute allowedRole="consultant">
+              <ConsultantDashboard />
             </PrivateRoute>
           }
         />
