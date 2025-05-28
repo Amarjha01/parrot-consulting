@@ -1,72 +1,306 @@
-import React, { useState } from 'react';
-import { Home, MessageCircle, Settings, LogOut, Star } from 'lucide-react';
+// import React, { useState, useEffect } from "react";
+// import { Home, MessageCircle, Settings, LogOut, Star } from "lucide-react";
+// import { seeBooking } from "../service/userApi";
 
-// Mock data for bookings
-const mockBookings = [
-  {
-    id: 1,
-    consultantName: "Maria Smith",
-    service: "Legal Consulting",
-    date: "April 25, 2024",
-    time: "10:00 AM",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-  },
-  {
-    id: 2,
-    consultantName: "John Davis",
-    service: "Business Consulting",
-    date: "April 28, 2024",
-    time: "2:30 PM",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-  },
-  {
-    id: 3,
-    consultantName: "Sarah Johnson",
-    service: "Financial Planning",
-    date: "May 2, 2024",
-    time: "11:15 AM",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-  }
-];
 
-// Sidebar Component
+
+// const Sidebar = ({ activeTab, setActiveTab }) => {
+//   const menuItems = [
+//     { id: "dashboard", icon: Home, label: "Dashboard" },
+//     { id: "messages", icon: MessageCircle, label: "Messages" },
+//     { id: "settings", icon: Settings, label: "Settings" },
+//   ];
+
+//   return (
+//     <div className="w-64 bg-white h-screen shadow-lg flex flex-col">
+//       {/* Logo */}
+//       <div className="p-6 border-b">
+//         <div className="flex items-center space-x-2">
+//           <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+//             <div className="w-4 h-4 bg-white rounded-full"></div>
+//           </div>
+//           <span className="font-bold text-lg">PARROT</span>
+//           <span className="text-sm text-gray-500">CONSULT</span>
+//         </div>
+//       </div>
+
+//       {/* Navigation */}
+//       <nav className="flex-1 p-4">
+//         <ul className="space-y-2">
+//           {menuItems.map((item) => {
+//             const Icon = item.icon;
+//             return (
+//               <li key={item.id}>
+//                 <button
+//                   onClick={() => setActiveTab(item.id)}
+//                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+//                     activeTab === item.id
+//                       ? "bg-gray-100 text-gray-900"
+//                       : "text-gray-600 hover:bg-gray-50"
+//                   }`}
+//                 >
+//                   <Icon size={20} />
+//                   <span>{item.label}</span>
+//                 </button>
+//               </li>
+//             );
+//           })}
+//         </ul>
+//       </nav>
+
+//       {/* Logout */}
+//       <div className="p-4 border-t">
+//         <button className="w-full flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+//           <LogOut size={20} />
+//           <span>Logout</span>
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Booking Card Component
+// const BookingCard = ({ booking }) => {
+//   return (
+//     <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+//       <div className="flex items-start justify-between">
+//         <div className="flex items-center space-x-4">
+//           <img
+//             src={booking.avatar}
+//             alt={booking.consultantName}
+//             className="w-16 h-16 rounded-full object-cover"
+//           />
+//           <div>
+//             <h3 className="font-semibold text-lg text-gray-900">
+//               {booking.consultantName}
+//             </h3>
+//             <p className="text-gray-600 text-sm">{booking.service}</p>
+//             <p className="text-gray-500 text-sm mt-1">
+//               {booking.date} at {booking.time}
+//             </p>
+//           </div>
+//         </div>
+//         <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+//           View Details
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // Rating Component
+// const RatingSection = () => {
+//   const [rating, setRating] = useState(5);
+//   const [feedback, setFeedback] = useState("");
+
+//   const handleSubmit = () => {
+//     // Handle rating submission
+//     console.log("Rating:", rating, "Feedback:", feedback);
+//     setFeedback("");
+//   };
+
+//   return (
+//     <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+//       <h2 className="text-xl font-semibold text-gray-900 mb-6">
+//         Leave a Rating
+//       </h2>
+
+//       <div className="flex items-center space-x-4 mb-4">
+//         <img
+//           src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+//           alt="Maria Smith"
+//           className="w-12 h-12 rounded-full object-cover"
+//         />
+//         <div>
+//           <h3 className="font-medium text-gray-900">Maria Smith</h3>
+//           <div className="flex space-x-1">
+//             {[1, 2, 3, 4, 5].map((star) => (
+//               <button
+//                 key={star}
+//                 onClick={() => setRating(star)}
+//                 className="focus:outline-none"
+//               >
+//                 <Star
+//                   size={20}
+//                   className={`${
+//                     star <= rating
+//                       ? "text-yellow-400 fill-current"
+//                       : "text-gray-300"
+//                   }`}
+//                 />
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+
+//       <textarea
+//         value={feedback}
+//         onChange={(e) => setFeedback(e.target.value)}
+//         placeholder="Enter your feedback..."
+//         className="w-full p-3 border border-gray-300 rounded-lg resize-none h-24 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+//       />
+
+//       <button
+//         onClick={handleSubmit}
+//         className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+//       >
+//         Submit
+//       </button>
+//     </div>
+//   );
+// };
+
+// // Main Dashboard Component
+// const UserDashboard = () => {
+//   const [activeTab, setActiveTab] = useState("dashboard");
+//   const [bookings, setBookings] = useState([]); // ✅ not undefined
+
+
+//   useEffect(() => {
+//     const fetchBookings = async () => {
+//       try {
+//         const data = await seeBooking();
+//         console.log("Fetched booking response:", data);
+//         setBookings(data.data);
+//         // or data depending on shape
+//       } catch (err) {
+//         console.error("Failed to fetch bookings:", err.response?.data || err.message);
+//       }
+//     };
+  
+//     fetchBookings();
+//   }, []);
+  
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 flex">
+//       {/* Mobile Sidebar Overlay */}
+//       <div className="lg:hidden fixed inset-0 z-50 hidden">
+//         <div className="absolute inset-0 bg-black opacity-50"></div>
+//         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+//       </div>
+
+//       {/* Desktop Sidebar */}
+//       <div className="hidden lg:block">
+//         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+//       </div>
+
+//       {/* Main Content */}
+//       <div className="flex-1 lg:ml-0">
+//         {/* Header */}
+//         <div className="bg-white shadow-sm border-b px-6 py-4">
+//           <div className="flex items-center justify-between">
+//             <div>
+//               <p className="text-sm text-gray-500">After signup</p>
+//               <h1 className="text-2xl font-bold text-gray-900">
+//                 User dashboard
+//               </h1>
+//             </div>
+
+//             {/* Mobile Menu Button */}
+//             <button className="lg:hidden p-2 rounded-md hover:bg-gray-100">
+//               <div className="w-6 h-6 flex flex-col justify-center space-y-1">
+//                 <div className="w-full h-0.5 bg-gray-600"></div>
+//                 <div className="w-full h-0.5 bg-gray-600"></div>
+//                 <div className="w-full h-0.5 bg-gray-600"></div>
+//               </div>
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Content Area */}
+//         <div className="p-6">
+//           <div className="max-w-4xl">
+//             {/* Welcome Message */}
+//             <div className="mb-8">
+//               <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+//                 Welcome, John.
+//               </h2>
+//             </div>
+
+//             {/* Upcoming Bookings */}
+//             <div className="mb-8">
+//               <h3 className="text-xl font-semibold text-gray-900 mb-6">
+//                 Upcoming Booking
+//               </h3>
+//               <div className="space-y-4">
+//                 {Array.isArray(bookings) && bookings.length > 0 ? (
+//                   bookings.map((booking) => (
+//                     <BookingCard
+//                       key={booking._id}
+//                       booking={{
+//                         consultantName:
+//                           booking.consultant?.name || "Unknown Consultant",
+//                         service: booking.projectDetails || "Consulting",
+//                         date: new Date(booking.datetime).toLocaleDateString(),
+//                         time: new Date(booking.datetime).toLocaleTimeString(
+//                           [],
+//                           { hour: "2-digit", minute: "2-digit" }
+//                         ),
+//                         avatar:
+//                           booking.consultant?.profilePicture ||
+//                           "https://via.placeholder.com/150",
+//                       }}
+//                     />
+//                   ))
+//                 ) : (
+//                   <p className="text-gray-500">No scheduled bookings found.</p>
+//                 )}
+//               </div>
+//             </div>
+
+//             {/* Rating Section */}
+//             <RatingSection />
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default UserDashboard;
+import React, { useState, useEffect } from "react";
+import { Home, MessageCircle, Settings, LogOut, Star } from "lucide-react";
+import { seeBooking , logoutUSer} from "../service/userApi";
+
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const menuItems = [
-    { id: 'dashboard', icon: Home, label: 'Dashboard' },
-    { id: 'messages', icon: MessageCircle, label: 'Messages' },
-    { id: 'settings', icon: Settings, label: 'Settings' }
+    { id: "dashboard", icon: Home, label: "Dashboard" },
+    { id: "messages", icon: MessageCircle, label: "Messages" },
+    { id: "settings", icon: Settings, label: "Settings" },
   ];
 
   return (
-    <div className="w-64 bg-white h-screen shadow-lg flex flex-col">
+    <div className="w-64 bg-gray-900 h-screen shadow-2xl flex flex-col border-r border-gray-800">
       {/* Logo */}
-      <div className="p-6 border-b">
+      <div className="p-6 border-b border-gray-800">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-            <div className="w-4 h-4 bg-white rounded-full"></div>
+          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-5 h-5 bg-white rounded-full"></div>
           </div>
-          <span className="font-bold text-lg">PARROT</span>
-          <span className="text-sm text-gray-500">CONSULT</span>
+          <span className="font-bold text-xl text-white">PARROT</span>
+          <span className="text-sm text-green-400 font-medium">CONSULT</span>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-4">
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <li key={item.id}>
                 <button
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 ${
                     activeTab === item.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg transform scale-105"
+                      : "text-gray-300 hover:bg-gray-800 hover:text-green-400"
                   }`}
                 >
                   <Icon size={20} />
-                  <span>{item.label}</span>
+                  <span className="font-medium">{item.label}</span>
                 </button>
               </li>
             );
@@ -75,10 +309,10 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t">
-        <button className="w-full flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+      <div className="p-4 border-t border-gray-800">
+        <button className="w-full flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-red-900/20 hover:text-red-400 rounded-xl transition-all duration-300">
           <LogOut size={20} />
-          <span>Logout</span>
+          <span className="font-medium">Logout</span>
         </button>
       </div>
     </div>
@@ -88,23 +322,29 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 // Booking Card Component
 const BookingCard = ({ booking }) => {
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+    <div className="bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-800 hover:border-green-500/50 transition-all duration-300 hover:transform hover:scale-105">
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-4">
-          <img
-            src={booking.avatar}
-            alt={booking.consultantName}
-            className="w-16 h-16 rounded-full object-cover"
-          />
+          <div className="relative">
+            <img
+              src={booking.avatar}
+              alt={booking.consultantName}
+              className="w-16 h-16 rounded-full object-cover border-2 border-green-500"
+            />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-gray-900"></div>
+          </div>
           <div>
-            <h3 className="font-semibold text-lg text-gray-900">{booking.consultantName}</h3>
-            <p className="text-gray-600 text-sm">{booking.service}</p>
-            <p className="text-gray-500 text-sm mt-1">
+            <h3 className="font-semibold text-lg text-white mb-1">
+              {booking.consultantName}
+            </h3>
+            <p className="text-green-400 text-sm font-medium">{booking.service}</p>
+            <p className="text-gray-400 text-sm mt-2 flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
               {booking.date} at {booking.time}
             </p>
           </div>
         </div>
-        <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+        <button className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-green-500/25">
           View Details
         </button>
       </div>
@@ -115,39 +355,45 @@ const BookingCard = ({ booking }) => {
 // Rating Component
 const RatingSection = () => {
   const [rating, setRating] = useState(5);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState("");
 
   const handleSubmit = () => {
     // Handle rating submission
-    console.log('Rating:', rating, 'Feedback:', feedback);
-    setFeedback('');
+    console.log("Rating:", rating, "Feedback:", feedback);
+    setFeedback("");
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Leave a Rating</h2>
-      
-      <div className="flex items-center space-x-4 mb-4">
-        <img
-          src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-          alt="Maria Smith"
-          className="w-12 h-12 rounded-full object-cover"
-        />
+    <div className="bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-800">
+      <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
+        <Star className="text-yellow-400 mr-2" size={24} />
+        Leave a Rating
+      </h2>
+
+      <div className="flex items-center space-x-4 mb-6">
+        <div className="relative">
+          <img
+            src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+            alt="Maria Smith"
+            className="w-12 h-12 rounded-full object-cover border-2 border-green-500"
+          />
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900"></div>
+        </div>
         <div>
-          <h3 className="font-medium text-gray-900">Maria Smith</h3>
-          <div className="flex space-x-1">
+          <h3 className="font-medium text-white">Maria Smith</h3>
+          <div className="flex space-x-1 mt-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 onClick={() => setRating(star)}
-                className="focus:outline-none"
+                className="focus:outline-none transition-transform hover:scale-110"
               >
                 <Star
                   size={20}
                   className={`${
                     star <= rating
-                      ? 'text-yellow-400 fill-current'
-                      : 'text-gray-300'
+                      ? "text-yellow-400 fill-current"
+                      : "text-gray-600 hover:text-gray-500"
                   }`}
                 />
               </button>
@@ -160,14 +406,14 @@ const RatingSection = () => {
         value={feedback}
         onChange={(e) => setFeedback(e.target.value)}
         placeholder="Enter your feedback..."
-        className="w-full p-3 border border-gray-300 rounded-lg resize-none h-24 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        className="w-full p-4 bg-gray-800 border border-gray-700 rounded-xl resize-none h-24 focus:ring-2 focus:ring-green-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
       />
-      
+
       <button
         onClick={handleSubmit}
-        className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+        className="mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 font-medium shadow-lg hover:shadow-green-500/25"
       >
-        Submit
+        Submit Rating
       </button>
     </div>
   );
@@ -175,10 +421,32 @@ const RatingSection = () => {
 
 // Main Dashboard Component
 const UserDashboard = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [bookings, setBookings] = useState([]);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const storedUserData = localStorage.getItem('user');
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    }
+
+    const fetchBookings = async () => {
+      try {
+        const data = await seeBooking();
+        console.log("Fetched booking response:", data);
+        setBookings(data.data);
+      } catch (err) {
+        console.error("Failed to fetch bookings:", err.response?.data || err.message);
+      }
+    };
+  
+    fetchBookings();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-black flex">
       {/* Mobile Sidebar Overlay */}
       <div className="lg:hidden fixed inset-0 z-50 hidden">
         <div className="absolute inset-0 bg-black opacity-50"></div>
@@ -193,39 +461,75 @@ const UserDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 lg:ml-0">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b px-6 py-4">
+        <div className="bg-gray-900 shadow-2xl border-b border-gray-800 px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">After signup</p>
-              <h1 className="text-2xl font-bold text-gray-900">User dashboard</h1>
+              <p className="text-sm text-green-400 font-medium">After signup</p>
+              <h1 className="text-3xl font-bold text-white mt-1">
+                User Dashboard
+              </h1>
             </div>
-            
+
             {/* Mobile Menu Button */}
-            <button className="lg:hidden p-2 rounded-md hover:bg-gray-100">
+            <button className="lg:hidden p-2 rounded-md hover:bg-gray-800 transition-colors">
               <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-                <div className="w-full h-0.5 bg-gray-600"></div>
-                <div className="w-full h-0.5 bg-gray-600"></div>
-                <div className="w-full h-0.5 bg-gray-600"></div>
+                <div className="w-full h-0.5 bg-green-400"></div>
+                <div className="w-full h-0.5 bg-green-400"></div>
+                <div className="w-full h-0.5 bg-green-400"></div>
               </div>
             </button>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="p-6">
+        <div className="p-6 bg-gradient-to-br from-black to-gray-900 min-h-screen">
           <div className="max-w-4xl">
             {/* Welcome Message */}
             <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome, John.</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent mb-2">
+                Welcome back, {userData?.name || 'User'}! 👋
+              </h2>
+              <p className="text-gray-400">Here's what's happening with your consultations today.</p>
+              {userData?.email && (
+                <p className="text-green-400 text-sm mt-1">📧 {userData.email}</p>
+              )}
             </div>
 
             {/* Upcoming Bookings */}
             <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Upcoming Booking</h3>
+              <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
+                <div className="w-1 h-8 bg-gradient-to-b from-green-400 to-green-600 rounded-full mr-3"></div>
+                Upcoming Bookings
+              </h3>
               <div className="space-y-4">
-                {mockBookings.map((booking) => (
-                  <BookingCard key={booking.id} booking={booking} />
-                ))}
+                {Array.isArray(bookings) && bookings.length > 0 ? (
+                  bookings.map((booking) => (
+                    <BookingCard
+                      key={booking._id}
+                      booking={{
+                        consultantName:
+                          booking.consultant?.name || "Unknown Consultant",
+                        service: booking.projectDetails || "Consulting",
+                        date: new Date(booking.datetime).toLocaleDateString(),
+                        time: new Date(booking.datetime).toLocaleTimeString(
+                          [],
+                          { hour: "2-digit", minute: "2-digit" }
+                        ),
+                        avatar:
+                          booking.consultant?.profilePicture ||
+                          "https://via.placeholder.com/150",
+                      }}
+                    />
+                  ))
+                ) : (
+                  <div className="bg-gray-900 rounded-2xl p-8 text-center border border-gray-800">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <MessageCircle className="text-green-400" size={32} />
+                    </div>
+                    <p className="text-gray-400 text-lg">No scheduled bookings found.</p>
+                    <p className="text-gray-500 text-sm mt-2">Your upcoming consultations will appear here.</p>
+                  </div>
+                )}
               </div>
             </div>
 

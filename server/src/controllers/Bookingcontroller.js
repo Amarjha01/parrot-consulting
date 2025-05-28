@@ -1,0 +1,58 @@
+// controllers/bookingController.js
+import { Booking } from "../models/BookingModel.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
+
+
+import crypto from "crypto";
+
+export const createPendingBooking = asyncHandler(async (req, res) => {
+  const { consultantId, userId, datetime, duration, projectDetails } = req.body;
+
+  const booking = await Booking.create({
+    consultant: consultantId,
+    user: userId,
+    datetime,
+    duration,
+    projectDetails,
+    status: "pending",
+  });
+
+  if (!booking) {
+    throw new ApiError(500, "Something went wrong while creating booking");
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, booking, "Booking created successfully"));
+});
+
+
+export const confirmBooking = asyncHandler(async (req, res) => {
+  const { bookingId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(razorpay_order_id + "|" + razorpay_payment_id)
+    .digest("hex");
+
+  if (expectedSignature !== razorpay_signature) {
+    throw new ApiError(400, "Invalid Razorpay signature. Payment may be spoofed.");
+  }
+
+  const booking = await Booking.findByIdAndUpdate(
+    bookingId,
+    { status: "scheduled" },
+    { new: true }
+  );
+
+  if (!booking) {
+    throw new ApiError(404, "Booking not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, booking, "Booking confirmed and payment verified"));
+});

@@ -32,3 +32,15 @@ export const registerAsUser = (formdata) => {
       throw error.response?.data || error;
     }
   };
+
+
+
+
+  export const seeBooking = async () => {
+    try {
+      const response = await API.get("/user/seebookings");
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  }

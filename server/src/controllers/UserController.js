@@ -1,6 +1,7 @@
+import { Booking } from "../models/BookingModel.js";
 import { User } from "../models/UserModel.js";
 import { ApiError } from "../utils/ApiError.js";
-import {ApiResponse} from "../utils/ApiResponse.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 
 const genrateAccessTokenAndRefreshToken = async (userId) => {
@@ -28,9 +29,8 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All Fields are required");
   }
 
-
   const existingUser = await User.findOne({
-    $or: [{ email }, {  phoneNumber }],
+    $or: [{ email }, { phoneNumber }],
   });
 
   if (existingUser) {
@@ -39,7 +39,6 @@ export const registerUser = asyncHandler(async (req, res) => {
       "User With E-mail or Phonenumber already exists already exists"
     );
   }
-  
 
   const user = await User.create({
     name: name.toLowerCase(),
@@ -51,7 +50,6 @@ export const registerUser = asyncHandler(async (req, res) => {
   const registeredUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
-  
 
   if (!registeredUser) {
     throw new ApiError(500, "Failed to register user");
@@ -59,14 +57,12 @@ export const registerUser = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new ApiResponse(201, "User Registered Successfully", registeredUser));
-
 });
-
 
 // login user
 export const loginUser = asyncHandler(async (req, res) => {
-  const { email, password , phoneNumber } = req.body;
-  if((!email && !phoneNumber) || !password) {
+  const { email, password, phoneNumber } = req.body;
+  if ((!email && !phoneNumber) || !password) {
     throw new ApiError(400, "email/Username and Password are required");
   }
 
@@ -94,7 +90,6 @@ export const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    
   };
 
   return res
@@ -103,9 +98,14 @@ export const loginUser = asyncHandler(async (req, res) => {
     .cookie("refreshToken", refreshToken, options)
     .json(new ApiResponse(200, "User logged in successfully", loggedinUser));
 
-
+    // .json(
+    //   new ApiResponse(
+    //     200,
+    //     { user: loggedinUser, accessToken, refreshToken }, // here we are handeling the case where admin wants to set his cokkies him self in his local system may be he wants to login from another device
+    //     "user logged in successfully"
+    //   )
+    // );
 });
-
 
 // logout user
 export const logoutUser = asyncHandler(async (req, res) => {
@@ -131,4 +131,15 @@ export const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User logged out successfully"));
 });
 
+export const seeBooking = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
 
+  const booking = await Booking.find({
+    user: userId,
+    status: "scheduled",
+  })
+    .populate("consultant", "name email profilePicture") // optional
+    .sort({ datetime: 1 });
+
+  return res.status(200).json(new ApiResponse(200, booking));
+});
