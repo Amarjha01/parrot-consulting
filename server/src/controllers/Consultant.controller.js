@@ -209,3 +209,5 @@ export const loginAsConsultant = asyncHandler(async (req, res) => {
     .cookie("refreshToken", refreshToken, options)
     .json(new ApiResponse(200, loggedinConsultant));
 });
+
+

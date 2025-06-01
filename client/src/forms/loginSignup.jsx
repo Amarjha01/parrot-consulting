@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { registerAsUser, loginAsUser } from "../service/userApi";
 import { loginAsConsultant } from "../service/consultantApi"; // ✅ Import consultant login API
 import { useNavigate } from "react-router-dom";
+
 const LoginSignupModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [authMode, setAuthMode] = useState("login"); // 'login', 'signup', 'consultantLogin'
@@ -47,125 +48,72 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
       } else if (authMode === 'login' || authMode === 'consultantLogin') {
         const loginFunction = authMode === 'login' ? loginAsUser : loginAsConsultant;
         const response = await loginFunction(formData);
-        console.log("API response:", response);
+        
+        console.log("Full API response:", response);
+        console.log("Response data:", response.data);
 
-        // Extract user data depending on auth mode
-        const userData = authMode === 'login'
-          ? response.data?.status
-          : response.data?.data;
+        if (authMode === 'consultantLogin') {
+          // For consultant login, the data structure is response.data (which contains the consultant object)
+          const consultantData = response.data;
+          
+          console.log("Consultant data to store:", consultantData);
 
-        const role = userData?.role?.toLowerCase(); // handles both login types
+          if (!consultantData) {
+            alert("Login succeeded but consultant data is missing. Check API response.");
+            return;
+          }
 
-        console.log("Extracted role:", role);
-        console.log("User data to store:", userData);
+          // Clear previous roles
+          localStorage.removeItem("admin");
+          localStorage.removeItem("consultant");
+          localStorage.removeItem("user");
 
-        if (!role) {
-          alert("Login succeeded but role is missing. Check API response.");
-          return;
+          // Store consultant data
+          localStorage.setItem("consultant", JSON.stringify(consultantData));
+          
+          alert("Consultant login successful!");
+          onClose();
+          navigate('/ConsultantDashboard');
+          
+        } else {
+          // For user login
+          const userData = response.data?.status;
+          const role = userData?.role?.toLowerCase();
+
+          console.log("Extracted role:", role);
+          console.log("User data to store:", userData);
+
+          if (!role) {
+            alert("Login succeeded but role is missing. Check API response.");
+            return;
+          }
+
+          // Clear previous roles
+          localStorage.removeItem("admin");
+          localStorage.removeItem("consultant");
+          localStorage.removeItem("user");
+
+          // Save role and redirect
+          switch (role) {
+            case 'user':
+              localStorage.setItem("user", JSON.stringify(userData));
+              navigate('/userdashboard');
+              break;
+            default:
+              alert("Unknown role: " + role + ". Redirecting to homepage.");
+              navigate('/');
+          }
+
+          alert(`${role.charAt(0).toUpperCase() + role.slice(1)} login successful!`);
+          onClose();
         }
-
-        // Clear previous roles
-        localStorage.removeItem("admin");
-        localStorage.removeItem("consultant");
-        localStorage.removeItem("user");
-
-        // Save role and redirect
-        switch (role) {
-          case 'consultant':
-            localStorage.setItem("consultant", JSON.stringify(userData));
-            navigate('/ConsultantDashboard');
-            break;
-          case 'user':
-            localStorage.setItem("user", JSON.stringify(userData));
-            navigate('/userdashboard');
-            break;
-          default:
-            alert("Unknown role: " + role + ". Redirecting to homepage.");
-            navigate('/');
-        }
-
-        alert(`${role.charAt(0).toUpperCase() + role.slice(1)} login successful!`);
-        onClose();
       }
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err);
+      console.error("Error response:", err?.response);
       alert(err?.response?.data?.message || "Something went wrong");
     }
   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       if (authMode === 'signup') {
-//         if (formData.password !== formData.confirmPassword) {
-//           alert("Passwords do not match");
-//           return;
-//         }
-  
-//         await registerAsUser({ ...formData, role: "user" });
-//         console.log("FULL login response:", response);
-
-//         alert("Signup successful!");
-//         onClose();
-//       } else if (authMode === 'login' || authMode === 'consultantLogin') {
-//         const loginFunction = authMode === 'login' ? loginAsUser : loginAsConsultant;
-//         const response = await loginFunction(formData);
-  
-//         // ✅ CORRECT EXTRACTION
-//         const isUserLogin = authMode === 'login';
-//         const user = isUserLogin ? response.data?.data?.user : response.data?.data?.data?.user?.role;
-//         const token = response.data?.data?.accessToken;
-//         console.log("Extracted user:", user);
-// console.log("Extracted token:", token);
-  
-//         if (!user || !token) {
-//           console.log("FULL login response:", response);
-
-//           alert("Login response missing user or token");
-//           return;
-//         }
-  
-//         const userData = {
-//           ...user,
-//           token, // ✅ token will now be stored
-//         };
-  
-//         const role = user?.role?.toLowerCase();
-  
-//         if (!role) {
-//           alert("Login succeeded but role is missing. Check API response.");
-//           return;
-//         }
-  
-//         // Clear old roles
-//         localStorage.removeItem("admin");
-//         localStorage.removeItem("consultant");
-//         localStorage.removeItem("user");
-  
-//         // Save and redirect
-//         switch (role) {
-//           case 'consultant':
-//             localStorage.setItem("consultant", JSON.stringify(userData));
-//             navigate('/ConsultantDashboard');
-//             break;
-//           case 'user':
-//             localStorage.setItem("user", JSON.stringify(userData));
-//             navigate('/userdashboard');
-//             break;
-//           default:
-//             alert("Unknown role: " + role + ". Redirecting to homepage.");
-//             navigate('/');
-//         }
-  
-//         alert(`${role.charAt(0).toUpperCase() + role.slice(1)} login successful!`);
-//         onClose();
-//       }
-//     } catch (err) {
-//       console.error(err);
-//       alert(err?.response?.data?.message || "Something went wrong");
-//     }
-//   };
-  
 
   if (!isOpen) return null;
 
@@ -378,7 +326,8 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
               type="submit"
               className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              {authMode === "login" ? "Sign In" : "Create Account"}
+              {authMode === "login" || authMode === "consultantLogin" ? "Sign In" : "Create Account" }
+              
             </button>
           </form>
 

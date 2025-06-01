@@ -4,7 +4,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 
-
 import crypto from "crypto";
 
 export const createPendingBooking = asyncHandler(async (req, res) => {
@@ -28,9 +27,13 @@ export const createPendingBooking = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, booking, "Booking created successfully"));
 });
 
-
 export const confirmBooking = asyncHandler(async (req, res) => {
-  const { bookingId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  const {
+    bookingId,
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  } = req.body;
 
   const secret = process.env.RAZORPAY_KEY_SECRET;
   const expectedSignature = crypto
@@ -39,7 +42,10 @@ export const confirmBooking = asyncHandler(async (req, res) => {
     .digest("hex");
 
   if (expectedSignature !== razorpay_signature) {
-    throw new ApiError(400, "Invalid Razorpay signature. Payment may be spoofed.");
+    throw new ApiError(
+      400,
+      "Invalid Razorpay signature. Payment may be spoofed."
+    );
   }
 
   const booking = await Booking.findByIdAndUpdate(
@@ -54,5 +60,20 @@ export const confirmBooking = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, booking, "Booking confirmed and payment verified"));
+    .json(
+      new ApiResponse(200, booking, "Booking confirmed and payment verified")
+    );
+});
+
+// get bookings by consultant id
+
+export const getBookingsByConsultantId = asyncHandler(async (req, res) => {
+  const { consultantId } = req.params;
+
+  const bookings = await Booking.find({
+    consultant: consultantId,
+    status: "scheduled",
+  }).populate("user", "name"); // Only populates the name field of the user
+
+  return res.status(200).json(new ApiResponse(200, bookings));
 });

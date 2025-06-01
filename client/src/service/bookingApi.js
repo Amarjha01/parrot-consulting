@@ -35,6 +35,23 @@ export const confirmBooking = async (data) => {
 
 
 
+ 
+
+export const getBookingsByConsultantId = async (consultantId) => {
+  try {
+    const response = await API.get(`/booking/getbookingsviaConsultantid/${consultantId}`);
+    return response.data.data; // assuming you're using `new ApiResponse(code, data)`
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+
+
+
+
+
+
 export const  createOrder  = async (data) => {
   try {
     const response = await API.post("/payment/create-order", data);
