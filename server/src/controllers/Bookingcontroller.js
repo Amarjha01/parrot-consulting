@@ -1,7 +1,7 @@
 // controllers/bookingController.js
 import { Booking } from "../models/BookingModel.js";
 import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiResponse } from "../utils/Apiresponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 
 import crypto from "crypto";

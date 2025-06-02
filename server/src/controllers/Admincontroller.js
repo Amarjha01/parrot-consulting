@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/Apiresponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Consultant } from "../models/ConsultantModel.js";
 import sendEmail from "../services/email.service.js";
+import { Booking } from "../models/BookingModel.js";
 
 const generateAccessAndRefreshToken = async (adminId) => {
   try {
@@ -209,4 +210,12 @@ export const rejectConsultant = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(200, null, "Consultant rejected and deleted successfully")
     );
+});
+
+
+// admin get all booking 
+
+export const adminGetAllBookings = asyncHandler(async (req, res) => {
+  const bookings = await Booking.find({status:"scheduled"}).populate("user").populate("consultant");
+  return res.status(200).json(new ApiResponse(200, bookings));
 });

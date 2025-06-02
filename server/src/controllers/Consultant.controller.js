@@ -1,7 +1,7 @@
 import { upload } from "../middlewares/multer.js";
 import { Consultant } from "../models/ConsultantModel.js";
 import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiResponse } from "../utils/Apiresponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { uploadOnCloudinary } from "../utils/clodinary.js";
 

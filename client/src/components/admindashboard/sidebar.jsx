@@ -1,23 +1,49 @@
-import { User, Users, CheckCircle, XCircle, LogOut, Shield, Bell, Settings } from 'lucide-react';
+import { User, Users, CheckCircle, XCircle, LogOut, Shield, Bell, Settings, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Close mobile menu when tab changes
+  useEffect(() => {
+    if (isMobile) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [activeTab, isMobile]);
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Shield },
     { id: 'consultants', label: 'Pending Consultants', icon: Users },
+    { id: 'bookings', label: 'Bookings', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
-  return (
-    <div className="bg-gradient-to-b from-green-700 to-green-800 text-white w-64 min-h-screen flex flex-col shadow-xl">
-      {/*Sidebar Header */}
-      <div className="mb-8 p-6 border-b border-green-600/30">
+  const SidebarContent = () => (
+    <>
+      {/* Sidebar Header */}
+      <div className={`mb-8 p-6 border-b border-green-600/30 ${isMobile ? 'pt-4' : ''}`}>
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center shadow-lg">
             <Shield size={24} className="text-green-800" />
           </div>
-          <div>
+          <div className="lg:block">
             <h2 className="text-xl font-bold text-white">Admin Panel</h2>
-            <p className="text-green-200 text-sm opacity-90">Management Console</p>
+            <p className="text-green-200 text-sm opacity-90 hidden sm:block">Management Console</p>
           </div>
         </div>
       </div>
@@ -53,7 +79,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
               
               <span className={`font-medium transition-colors ${
                 isActive ? 'text-green-900' : 'text-green-100'
-              }`}>
+              } truncate`}>
                 {item.label}
               </span>
 
@@ -77,7 +103,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
           <div className="p-1.5 rounded-lg group-hover:bg-red-600/20 transition-colors">
             <LogOut size={18} />
           </div>
-          <span>Logout</span>
+          <span className="truncate">Logout</span>
           
           {/* Logout arrow indicator */}
           <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
@@ -85,6 +111,63 @@ export const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
           </div>
         </button>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-green-700 text-white rounded-lg shadow-lg hover:bg-green-600 transition-colors"
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex bg-gradient-to-b from-green-700 to-green-800 text-white w-64 min-h-screen flex-col shadow-xl">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile Sidebar */}
+      <aside 
+        className={`lg:hidden fixed left-0 top-0 z-40 bg-gradient-to-b from-green-700 to-green-800 text-white min-h-screen flex flex-col shadow-xl transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen 
+            ? 'w-80 sm:w-64 translate-x-0' 
+            : 'w-80 sm:w-64 -translate-x-full'
+        }`}
+      >
+        {/* Close button for mobile */}
+        <div className="flex justify-between items-center p-4 border-b border-green-600/30">
+          <div className="flex items-center space-x-2">
+            <Shield size={20} className="text-yellow-400" />
+            <span className="text-lg font-semibold">Menu</span>
+          </div>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-1 hover:bg-green-600/50 rounded transition-colors"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="flex-1 flex flex-col">
+          <SidebarContent />
+        </div>
+      </aside>
+
+      {/* Spacer for mobile to prevent content overlap */}
+      <div className="lg:hidden h-16"></div>
+    </>
   );
 };

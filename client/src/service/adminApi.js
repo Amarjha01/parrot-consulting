@@ -60,3 +60,13 @@ export const adminrejectconsultant = async (consultantId) => {
     throw error.response?.data || error;
   }
 };
+
+
+export const adminSeeAllBookings = async () => {
+  try {
+    const response = await API.get("/admin/getallbookingsAdmin");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

@@ -13,6 +13,9 @@ import AdminLoginForm from "./forms/adminRegistrationLogin";
 import PrivateRoute from "./routes/ProtectedRoutes";
 import UserDashboard from "./pages/ClientDashboard";
 import ConsultantDashboard from "./pages/ConsultantDashboard";
+import HowItWorksPage from "./pages/HowitWorks";
+import PopularCategoriesPage from "./pages/Categories";
+import AboutUsPage from "./pages/AboutUs";
 // import AdminDashboard from './pages/AdminDashboard';
 // import PendingConsultants from './pages/PendingConsultants';
 
@@ -21,6 +24,11 @@ const App = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/adminsecuredlogin" element={<AdminLoginForm />} />
+      <Route path="/howitworks" element={<HowItWorksPage />} />
+      <Route path="/categories" element={<PopularCategoriesPage />} />
+      <Route path="/aboutus" element={<AboutUsPage />} />
+
+      
       {/* <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} /> */}
 

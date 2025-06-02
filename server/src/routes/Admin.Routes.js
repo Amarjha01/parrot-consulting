@@ -1,5 +1,5 @@
 import  { Router } from "express";
-import { approveConsultant, approvedConsultants, loginAdmin, logoutAdmin, registerAdmin, rejectConsultant, unapprovedConsultants } from "../controllers/Admincontroller.js";
+import { adminGetAllBookings, approveConsultant, approvedConsultants, loginAdmin, logoutAdmin, registerAdmin, rejectConsultant, unapprovedConsultants } from "../controllers/Admincontroller.js";
 import { verifyAdmin } from "../middlewares/AdminAuthMiddleware.js";
 const AdminRouter = Router();
 
@@ -11,5 +11,9 @@ AdminRouter.route("/seeunapprovedconsultants").get( verifyAdmin  , unapprovedCon
 AdminRouter.route("/seeapprovedconsultants").get( verifyAdmin  , approvedConsultants);
 AdminRouter.route("/adminapproveconsultant/:consultantId").post( verifyAdmin  , approveConsultant);
 AdminRouter.route("/adminrejectconsultant/:consultantId").post( verifyAdmin  , rejectConsultant);
+AdminRouter.route("/getallbookingsAdmin").get(verifyAdmin, adminGetAllBookings);
+
+
+
 
 export default AdminRouter;
