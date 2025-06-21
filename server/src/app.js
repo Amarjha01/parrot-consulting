@@ -8,7 +8,7 @@ const app = express();
 
 
 app.use(express.json({
-    limit: '20kb'
+    limit: '20mb'
 }));
 
 
@@ -27,7 +27,7 @@ console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN); // Debug this
 
 app.use(express.urlencoded({
     extended: true,
-    limit: '20kb'
+    limit: '20mb'
 }));
 
 

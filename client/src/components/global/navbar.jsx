@@ -226,8 +226,12 @@ export default function Navbar() {
             <div className="py-5 px-2 flex items-center justify-between">
               {/* Left Side - Logo */}
               <div className="flex items-center flex-shrink-0">
-                <div className="transform hover:scale-110 transition-all duration-300 drop-shadow-lg">
-                  <Logo />
+                <div className="transform hover:scale-110 transition-all duration-300 drop-shadow-lg rounded-full bg-yellow-100" >
+                  <img
+                    src="/parrot1.png" // 👈 path is relative to /public
+                    alt="Logo"
+                    className="h-15 w-auto" // adjust size as needed
+                  />
                 </div>
               </div>
 
@@ -247,25 +251,24 @@ export default function Navbar() {
                   ))}
                 </div> */}
                 <div className="flex items-center space-x-10">
-  {["Categories", "How It Works", "About"].map((item) => {
-    let path = "#";
-    if (item === "How It Works") path = "/howitworks";
-    else if (item === "Categories") path = "/categories";
-    else if (item === "About") path = "/aboutus";
+                  {["Categories", "How It Works", "About"].map((item) => {
+                    let path = "#";
+                    if (item === "How It Works") path = "/howitworks";
+                    else if (item === "Categories") path = "/categories";
+                    else if (item === "About") path = "/aboutus";
 
-    return (
-      <Link
-        key={item}
-        to={path}
-        className="relative text-gray-700 hover:text-emerald-600 font-semibold text-lg transition-all duration-300 group py-2 px-4 rounded-xl hover:bg-emerald-50/80"
-        onClick={() => setMenuOpen(false)}
-      >
-        {item}
-      </Link>
-    );
-  })}
-</div>
-
+                    return (
+                      <Link
+                        key={item}
+                        to={path}
+                        className="relative text-gray-700 hover:text-emerald-600 font-semibold text-lg transition-all duration-300 group py-2 px-4 rounded-xl hover:bg-emerald-50/80"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        {item}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Mobile Menu Toggle */}

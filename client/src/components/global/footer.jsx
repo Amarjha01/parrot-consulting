@@ -12,7 +12,11 @@ export default function Footer() {
         <div className="max-w-screen-xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <Logo />
+            <img
+                    src="/parrot1.png" // 👈 path is relative to /public
+                    alt="Logo"
+                    className="h-50 w-auto" // adjust size as needed
+                  />
               <p className="mt-4">Connecting experts with clients who need their specialized knowledge.</p>
             </div>
             <div>
@@ -34,11 +38,11 @@ export default function Footer() {
             <div>
               <h3 className="font-bold mb-4">Contact</h3>
               <p>info@parrotconsult.com</p>
-              <p>+1 (555) 123-4567</p>
+              <p>+91 8868864441</p>
             </div>
           </div>
           <div className="border-t border-green-800 mt-8 pt-8 text-center">
-            <p>&copy; {new Date().getFullYear()} Parrot Consult. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()}  Parrot Consult. All rights reserved. product of FEB TECH IT SOLUTIONS Pvt. ltd.</p>
           </div>
         </div>
       </footer>

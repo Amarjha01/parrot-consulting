@@ -2,14 +2,21 @@ import React, { useState } from "react";
 import ConsultantCard from "./ConsultantCard"; // make sure path is correct
 
 import ConsultantBookingForm from "../../forms/BookingForm";
+import LoginSignupModal from "../../forms/loginSignup";
 
 export default function MeetExperts({ consultants, onViewProfile }) {
   const [selectedConsultant, setSelectedConsultant] = useState(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isLoginOpen, setLoginOpen] = useState(false);
 
   const handleBookNow = (consultant) => {
-    setSelectedConsultant(consultant);
-    setIsBookingOpen(true);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setLoginOpen(true); // open login modal
+    } else {
+      setSelectedConsultant(consultant);
+      setIsBookingOpen(true); // open booking form
+    }
   };
 
   return (
@@ -42,6 +49,11 @@ export default function MeetExperts({ consultants, onViewProfile }) {
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         preSelectedConsultant={selectedConsultant}
+      />
+      
+      <LoginSignupModal
+        isOpen={isLoginOpen}
+        onClose={() => setLoginOpen(false)}
       />
     </section>
   );
