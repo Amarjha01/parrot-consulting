@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/global/navbar';
 import Footer from '../components/global/footer';
+import { Link } from 'react-router-dom';
 
 const PopularCategoriesPage = () => {
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -177,23 +178,26 @@ const PopularCategoriesPage = () => {
             {/* Background decoration */}
             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cg fill=none fill-rule=evenodd%3E%3Cg fill=%23ffffff fill-opacity=0.15%3E%3Ccircle cx=30 cy=30 r=4/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
             
-            <div className="relative">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Ready to Start Learning?
-              </h2>
-              <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                Join thousands of students already learning from expert consultants
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <button className="bg-white text-emerald-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  Browse All Tutors
-                </button>
-                <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold hover:bg-white hover:text-emerald-600 transition-all duration-300">
-                  Become a Tutor
-                </button>
-              </div>
-            </div>
+          <div className="relative">
+  <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+    Ready to Grow with Expert Consulting?
+  </h2>
+  <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+    Join thousands of businesses already thriving with guidance from top consultants in IT, E-commerce, and Legal services.
+  </p>
+
+  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+   <Link to={'/'}>
+    <button className="bg-white text-emerald-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+      Explore Consultants
+    </button>
+   </Link>
+    <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold hover:bg-white hover:text-emerald-600 transition-all duration-300">
+      Offer Consulting Services
+    </button>
+  </div>
+</div>
+
           </div>
         </div>
       </div>

@@ -11,12 +11,10 @@ export default function MeetExperts({ consultants, onViewProfile }) {
 
   const handleBookNow = (consultant) => {
     const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) {
-      setLoginOpen(true); // open login modal
-    } else {
+   
       setSelectedConsultant(consultant);
       setIsBookingOpen(true); // open booking form
-    }
+
   };
 
   return (
@@ -37,7 +35,7 @@ export default function MeetExperts({ consultants, onViewProfile }) {
                 key={consultant._id}
                 consultant={consultant}
                 onViewProfile={onViewProfile}
-                onBookNow={handleBookNow} // 👈 Pass this
+                onBookNow={handleBookNow} 
               />
             ))}
           </div>
@@ -51,10 +49,7 @@ export default function MeetExperts({ consultants, onViewProfile }) {
         preSelectedConsultant={selectedConsultant}
       />
       
-      <LoginSignupModal
-        isOpen={isLoginOpen}
-        onClose={() => setLoginOpen(false)}
-      />
+
     </section>
   );
 }

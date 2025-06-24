@@ -1,6 +1,6 @@
 import React from "react";
 import {  MapPin, Clock, Star, Mail, Phone,  BookOpen, Award, Languages, Briefcase, ArrowLeft, ExternalLink } from "lucide-react";
-
+import { useParams } from "react-router-dom";
 export default function ConsultantDetailView({ consultant, onBack }) {
     const {
       name,
@@ -20,9 +20,10 @@ export default function ConsultantDetailView({ consultant, onBack }) {
       education,
       certificates
     } = consultant;
-  
+   const { id } = useParams();
     return (
-      <div className="max-w-5xl mx-auto p-8 m-4 bg-white">
+     <div className=" relative w-full flex justify-center items-center">
+       <div className=" absolute w-[60vw]  z-30  mx-auto p-8 m-4 bg-white">
         {/* Header */}
         <div className="flex items-center mb-6">
           <button 
@@ -207,5 +208,6 @@ export default function ConsultantDetailView({ consultant, onBack }) {
           </button>
         </div>
       </div>
+     </div>
     );
   }

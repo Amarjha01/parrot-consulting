@@ -16,18 +16,26 @@ import ConsultantDashboard from "./pages/ConsultantDashboard";
 import HowItWorksPage from "./pages/HowitWorks";
 import PopularCategoriesPage from "./pages/Categories";
 import AboutUsPage from "./pages/AboutUs";
+import ConsultantForm from "./components/global/ConsultantForm.jsx";
+import Navbar from "./components/global/navbar.jsx";
+import ConsultantDetailView from "./components/ConsultantProfile/consultantDetailView.jsx";
 // import AdminDashboard from './pages/AdminDashboard';
 // import PendingConsultants from './pages/PendingConsultants';
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
+    <>
+    <Navbar />
+<div  className=" ">
+       <Routes >
+      <Route path="/" element={<Home />}/>
       <Route path="/adminsecuredlogin" element={<AdminLoginForm />} />
       <Route path="/howitworks" element={<HowItWorksPage />} />
       <Route path="/categories" element={<PopularCategoriesPage />} />
       <Route path="/aboutus" element={<AboutUsPage />} />
-
+      <Route path="/consultantform" element={<ConsultantForm />} />
+      <Route path="/consultantprofile/:id" element={<ConsultantDetailView />} />
+      
       
       {/* <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} /> */}
@@ -70,6 +78,9 @@ const App = () => {
         />
         
     </Routes>
+</div>
+    </>
+   
   );
 };
 

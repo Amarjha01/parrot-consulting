@@ -34,7 +34,7 @@ export default function PopularCategories() {
         <h2 className="text-3xl font-bold text-center mb-12">
           Popular Categories
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 justify-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-items-center">
           {categories.map((category, index) => (
             <div
               key={index}
