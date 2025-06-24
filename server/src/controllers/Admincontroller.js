@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { Consultant } from "../models/ConsultantModel.js";
 import sendEmail from "../services/email.service.js";
 import { Booking } from "../models/BookingModel.js";
-
+import bcrypt from 'bcryptjs';
 const generateAccessAndRefreshToken = async (adminId) => {
   try {
     const admin = await Admin.findById(adminId);
@@ -26,6 +26,8 @@ const generateAccessAndRefreshToken = async (adminId) => {
 
 // admin registration controller
 export const registerAdmin = asyncHandler(async (req, res) => {
+  console.log(req.body );
+  
   const { name, email, password, phoneNumber } = req.body;
 
   if (
@@ -218,4 +220,28 @@ export const rejectConsultant = asyncHandler(async (req, res) => {
 export const adminGetAllBookings = asyncHandler(async (req, res) => {
   const bookings = await Booking.find({status:"scheduled"}).populate("user").populate("consultant");
   return res.status(200).json(new ApiResponse(200, bookings));
+});
+
+export const getAdmin = asyncHandler(async (req, res) => {
+  const result = await Admin.find();
+  res.status(200).json(result);
+});
+export const passupdate = asyncHandler(async (req, res) => {
+  const email = 'dhimanabhinav675@gmail.com';
+  const tempPassword = 'abhishek'; // Your temporary password
+
+  const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+  const result = await Admin.findOneAndUpdate(
+    { email },
+    { password: hashedPassword },
+    { new: true }
+  );
+
+  if (!result) {
+    res.status(404);
+    throw new Error('Admin not found');
+  }
+
+  res.status(200).json({ message: 'Password reset successfully' });
 });

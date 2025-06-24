@@ -37,8 +37,8 @@ export default function Footer() {
             </div>
             <div>
               <h3 className="font-bold mb-4">Contact</h3>
-              <p>info@parrotconsult.com</p>
-              <p>+91 8868864441</p>
+              <a href="mailto:info@parrotconsult.com">info@parrotconsult.com</a>
+             <a href="tel:8868864441">+91 8868864441</a>
             </div>
           </div>
           <div className="border-t border-green-800 mt-8 pt-8 text-center">

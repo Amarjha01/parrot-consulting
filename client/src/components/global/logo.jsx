@@ -15,7 +15,7 @@ export default function Logo() {
           </div>
         </div>
         <div className="ml-2">
-          <span className="font-bold text-xl text-gray-800">PARROT</span>
+          <span className="font-bold text-xl text-gray-800">PARRO</span>
           <span className="block text-xs text-gray-500">CONSULT</span>
         </div>
       </div>

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { globalconsultantdetails } from "../service/globalApi";
 import { confirmBooking, createOrder, creatependingBooking } from "../service/bookingApi";
+import LoginSignupModal from "./loginSignup";
 
 const ConsultantBookingForm = ({
   isOpen,
@@ -30,8 +31,9 @@ const ConsultantBookingForm = ({
   const [loading, setLoading] = useState(!preSelectedConsultant);
   const [error, setError] = useState(null);
   const [bookingComplete, setBookingComplete] = useState(false);
-
+ const [isLoginOpen, setLoginOpen] = useState(false);
   // Prevent background scroll when modal is open
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -151,8 +153,24 @@ const ConsultantBookingForm = ({
     setStep(3);
   };
 
+  const handleIsUserLogin = async () =>{
+    try {
+             const isuserlogin = await JSON.parse(localStorage.getItem("user"));
+          console.log(isuserlogin, 'iasdgjbsjnzb jhwas');
+          
+    if (!isuserlogin) {
+      setLoginOpen(true); 
+    }
+
+    
+    } catch (error) {
+      
+    }
+  }
+
   const handleBookingSubmit = async () => {
     try {
+   
       const datetime = new Date(selectedDate);
       datetime.setHours(selectedTime.getHours());
       datetime.setMinutes(selectedTime.getMinutes());
@@ -542,9 +560,12 @@ const ConsultantBookingForm = ({
                     className="w-full border p-3 rounded"
                   />
                 </div>
-
+   <LoginSignupModal
+        isOpen={isLoginOpen}
+        onClose={() => setLoginOpen(false)}
+      />
                 <button
-                  onClick={handleBookingSubmit}
+                  onClick={()=>{handleBookingSubmit()}}
                   disabled={!projectDetails.trim()}
                   className="w-full bg-teal-600 text-white py-3 rounded hover:bg-teal-700 disabled:bg-gray-400"
                 >

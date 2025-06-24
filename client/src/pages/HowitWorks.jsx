@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Monitor, Calendar, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
 import Navbar from '../components/global/navbar';
 import Footer from '../components/global/footer';
+import { Link } from 'react-router-dom';
 
 const HowItWorksPage = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -15,40 +16,44 @@ const HowItWorksPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const steps = [
-    {
-      icon: User,
-      title: "Create your profile",
-      description: "Showcase your business to potential clients",
-      details: "Set up your professional profile with your expertise, experience, and teaching style. Upload photos, certifications, and create a compelling bio that attracts your ideal students.",
-      color: "from-emerald-400 to-teal-500",
-      bgColor: "bg-emerald-50",
-      borderColor: "border-emerald-200"
-    },
-    {
-      icon: Monitor,
-      title: "Offer your services",
-      description: "List your teaching services and availability",
-      details: "Define your teaching subjects, set your rates, and specify your available time slots. Choose between online or in-person sessions to reach more students.",
-      color: "from-amber-400 to-orange-500",
-      bgColor: "bg-amber-50",
-      borderColor: "border-amber-200"
-    },
-    {
-      icon: Calendar,
-      title: "Get booked",
-      description: "Clients contact and pay for your time directly",
-      details: "Students browse your profile, book sessions that fit their schedule, and pay securely through the platform. Start teaching and grow your business effortlessly.",
-      color: "from-purple-400 to-pink-500",
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200"
-    }
-  ];
+const steps = [
+  {
+    icon: User,
+    title: "Create Your Profile",
+    description: "Present your consulting expertise",
+    details:
+      "Set up a professional profile highlighting your skills, industry experience, and areas of expertise. Upload credentials and craft a compelling bio to attract the right clients.",
+    color: "from-emerald-400 to-teal-500",
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+  },
+  {
+    icon: Monitor,
+    title: "List Your Services",
+    description: "Define your offerings and availability",
+    details:
+      "Specify the consulting services you offer — whether IT, E-commerce, or Legal — set your rates, and schedule. Choose virtual or in-person sessions to connect with more clients.",
+    color: "from-amber-400 to-orange-500",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+  },
+  {
+    icon: Calendar,
+    title: "Get Booked",
+    description: "Clients discover and book you directly",
+    details:
+      "Businesses browse your profile, choose services that meet their needs, and pay securely through our platform. Deliver results and build long-term client relationships.",
+    color: "from-purple-400 to-pink-500",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-200",
+  },
+];
+
 
   return (
    
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-cream-50 to-orange-50">
-         <Navbar/>
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/20 to-amber-100/20"></div>
@@ -62,9 +67,10 @@ const HowItWorksPage = () => {
                 </h1>
                 <Sparkles className="w-8 h-8 text-amber-500 ml-2 animate-pulse" />
               </div>
-              <p className="text-xl sm:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-                Start your teaching journey in three simple steps and connect with eager learners worldwide
-              </p>
+            <p className="text-xl sm:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+  Start your consulting journey in three simple steps and connect with clients seeking expert guidance.
+</p>
+
             </div>
           </div>
         </div>
@@ -159,27 +165,30 @@ const HowItWorksPage = () => {
           </div>
         </div>
 
-        {/* Success Story Section */}
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-8 sm:p-12 text-white text-center shadow-2xl">
-          <CheckCircle className="w-16 h-16 mx-auto mb-6 animate-bounce" />
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Ready to Start Teaching?
-          </h2>
-          <p className="text-xl sm:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join thousands of educators who are already earning and making a difference
-          </p>
-          <button className="bg-white text-emerald-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-            Get Started Today
-          </button>
-        </div>
+      {/* Success Story Section */}
+<div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-8 sm:p-12 text-white text-center shadow-2xl">
+  <CheckCircle className="w-16 h-16 mx-auto mb-6 animate-bounce" />
+  <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+    Ready to Start Consulting?
+  </h2>
+  <p className="text-xl sm:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
+    Join thousands of professionals earning on their terms and helping businesses grow.
+  </p>
+ <Link to={'/consultantform'}>
+  <button className="bg-white text-emerald-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+    Join as a Consultant
+  </button>
+ </Link>
+</div>
+
 
         {/* Features Grid */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { title: "Easy Setup", desc: "Profile ready in minutes" },
-            { title: "Secure Payments", desc: "Safe and reliable transactions" },
-            { title: "Global Reach", desc: "Connect with students worldwide" },
-            { title: "24/7 Support", desc: "We're here to help you succeed" }
+ { title: "Quick Setup", desc: "Launch your profile in minutes" },
+  { title: "Secure Payments", desc: "Safe and fast transactions" },
+  { title: "Business Reach", desc: "Connect with clients globally" },
+  { title: "24/7 Platform Support", desc: "We're here to help you grow" }
           ].map((feature, index) => (
             <div key={index} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-amber-100 hover:border-emerald-200">
               <h4 className="font-bold text-gray-900 mb-2">{feature.title}</h4>
