@@ -34,7 +34,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="relative z-50 mb-[8%] bg-gradient-to-br from-white via-gray-100 to-gray-300">
+      <nav className="relative z-50 mb-[6%] bg-gradient-to-br from-white via-gray-100 to-gray-300">
     
 
         {/* Main navbar container */}
