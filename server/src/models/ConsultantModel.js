@@ -63,10 +63,8 @@ const consultantSchema = new mongoose.Schema(
     ],
     languageProficiency: [String],
 
-    // Availability & Pricing
-    // Availability & Pricing
+    //  Pricing
     hourlyRate: Number,
-    bookingLeadTime: String,
 
     weeklyAvailability: [
       {
@@ -115,15 +113,15 @@ const consultantSchema = new mongoose.Schema(
     documents: {
       aadhaarCard: {
         type: String,
-        required: true, // Cloudinary URL or path
+        // required: true, 
       },
       panCard: {
         type: String,
-        required: false, // Cloudinary URL or path
+        // required: false, 
       },
       passport: {
         type: String, // Optional
-        required: false,
+        // required: false,
       },
     },
 

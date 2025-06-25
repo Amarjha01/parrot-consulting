@@ -13,10 +13,7 @@ export default function ConsultantApplicationForm() {
     specializedServices: "",
     keySkills: "",
     languageProficiency: [],
-    availabilityPerWeek: 20,
     hourlyRate: "",
-    preferredWorkingHours: "",
-    bookingLeadTime: "",
     acceptedTerms: false,
     visibleOnPlatform: false,
     education: [],
@@ -295,10 +292,7 @@ export default function ConsultantApplicationForm() {
           specializedServices: "",
           keySkills: "",
           languageProficiency: [],
-          availabilityPerWeek: 20,
           hourlyRate: "",
-          preferredWorkingHours: "",
-          bookingLeadTime: "",
           acceptedTerms: false,
           visibleOnPlatform: false,
           education: [],
@@ -716,29 +710,8 @@ export default function ConsultantApplicationForm() {
 
         {/* Availability & Pricing */}
         <div>
-          <h3 className="text-xl font-bold mb-4">Availability & Pricing</h3>
+          <h3 className="text-xl font-bold mb-4">Pricing</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <div className="flex items-center">
-                <label className="w-full">
-                  <span className="block mb-2">
-                    Availability Hours per Week
-                  </span>
-                  <input
-                    type="range"
-                    name="availabilityPerWeek"
-                    min="1"
-                    max="40"
-                    value={formData.availabilityPerWeek}
-                    onChange={handleInputChange}
-                    className="w-full"
-                  />
-                  <div className="text-center">
-                    {formData.availabilityPerWeek} hours
-                  </div>
-                </label>
-              </div>
-            </div>
             <div>
               <input
                 type="number"
@@ -750,37 +723,6 @@ export default function ConsultantApplicationForm() {
                 required
                 min="0"
               />
-            </div>
-            <div>
-              <select
-                name="preferredWorkingHours"
-                className="w-full border rounded p-2"
-                value={formData.preferredWorkingHours}
-                onChange={handleInputChange}
-              >
-                <option value="">Preferred Working Hours</option>
-                <option value="morning">Morning (6AM - 12PM)</option>
-                <option value="afternoon">Afternoon (12PM - 6PM)</option>
-                <option value="evening">Evening (6PM - 12AM)</option>
-                <option value="night">Night (12AM - 6AM)</option>
-                <option value="flexible">Flexible</option>
-              </select>
-            </div>
-            <div>
-              <select
-                name="bookingLeadTime"
-                className="w-full border rounded p-2"
-                value={formData.bookingLeadTime}
-                onChange={handleInputChange}
-              >
-                <option value="">Booking Lead Time</option>
-                <option value="1">1 day</option>
-                <option value="2">2 days</option>
-                <option value="3">3 days</option>
-                <option value="5">5 days</option>
-                <option value="7">1 week</option>
-                <option value="14">2 weeks</option>
-              </select>
             </div>
           </div>
         </div>
