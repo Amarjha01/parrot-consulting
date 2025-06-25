@@ -57,32 +57,33 @@ const FAQItem = ({ question, answer, isOpen, onToggle }) => {
 const faqData = [
   {
     id: 1,
-    question: "What services do you offer?",
-    answer: "We offer expert consultation services in three main categories: IT Consulting (cloud migration, software development, cybersecurity), Business Strategy (growth planning, operations optimization, market analysis), and Finance (investment planning, financial analysis, risk management). Our consultants are industry experts with proven track records."
+    question: "What is Parrot Consult?",
+    answer: "Parrot Consult is a platform that connects businesses and individuals with verified expert consultants across industries like legal, finance, IT, marketing, and more — all in one place."
   },
   {
     id: 2,
-    question: "How can I request a consultation?",
-    answer: "Requesting a consultation is simple! First, browse our expert consultants using our search and filter tools. Once you find the right match, click 'Book Now' on their profile. You'll be able to select your preferred time slot and provide details about your specific needs. Payment is processed securely, and you'll receive a confirmation with meeting details."
+    question: "How does it work?",
+    answer: "Simply choose your industry and business stage, answer a few quick questions, and we’ll recommend the best consultant for your needs. You can book a session directly through our platform."
   },
   {
     id: 3,
-    question: "What are your consulting fees?",
-    answer: "Our fees vary based on the consultant's expertise level and session duration. We offer three pricing tiers: Budget ($50-80/hour), Standard ($80-120/hour), and Premium ($120-200/hour). Most sessions are 60 minutes, but you can book extended sessions if needed. All pricing is transparent and shown upfront before booking."
+    question: "How much does it cost to consult?",
+    answer: "Our consultations start at just ₹1 for the first session (limited-time offer). Prices may vary depending on the consultant and type of service."
   },
   {
     id: 4,
-    question: "Can you provide examples of past work?",
-    answer: "Absolutely! Our consultants have helped numerous clients achieve their goals. Recent successes include helping a startup scale from 10 to 100 employees, migrating enterprise systems to cloud infrastructure saving 40% in costs, and developing investment strategies that outperformed market averages by 15%. Client testimonials and case studies are available on each consultant's profile."
+    question: "Who are the consultants?",
+    answer: "All our consultants are verified professionals with expertise in their domains — including startup mentors, lawyers, marketing strategists, IT experts, and more."
   },
   {
     id: 5,
-    question: "How do you tailor your advice to each client?",
-    answer: "Each consultation begins with understanding your unique situation, goals, and constraints. Our consultants use proven frameworks while adapting their approach to your industry, company size, and specific challenges. We provide actionable recommendations with clear implementation steps, and follow-up support is available to ensure successful execution of our advice."
+    question: "Can I become a consultant on Parrot?",
+    answer: "Yes! If you're an expert in your field, you can apply to join as a consultant. Click “Join as Consultant” and complete the onboarding process."
   }
 ];
 
-export default function HowItWorksAndFAQ() {
+
+export default function FAQ() {
   const [openFAQ, setOpenFAQ] = useState(null);
 
   const toggleFAQ = (id) => {
@@ -91,7 +92,7 @@ export default function HowItWorksAndFAQ() {
 
   return (
     <div className="bg-gray-50 py-16">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6">
         {/* FAQ Section */}
         <div>
           <AnimatedStep delay={1200}>
@@ -101,7 +102,7 @@ export default function HowItWorksAndFAQ() {
           </AnimatedStep>
           
           <AnimatedStep delay={1400}>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden px-4">
               {faqData.map((faq) => (
                 <FAQItem
                   key={faq.id}
