@@ -9,7 +9,7 @@ import Navbar from '../components/global/navbar'
 import CallToAction from '../components/Home/callToAction'
 
 import ConsultantManager from '../components/ConsultantProfile/ConsultantManager'
-import HowItWorksAndFAQ from '../components/Home/HowItWorksAndFAQ'
+import FAQ from '../components/Home/FAQ'
 
 const Home = () => {
   return (
@@ -18,7 +18,7 @@ const Home = () => {
       <PopularCategories />
       <HowItWorks />
       <ConsultantManager/>
-      <HowItWorksAndFAQ />
+      <FAQ />
       <Testimonials />
       <CallToAction/>
     </div>
