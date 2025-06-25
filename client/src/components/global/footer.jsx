@@ -2,10 +2,6 @@ import React from 'react'
 import Logo from './logo'
 
 
-
-
-
-
 export default function Footer() {
     return (
       <footer className="py-8 px-6 bg-green-900 text-white">
@@ -30,9 +26,9 @@ export default function Footer() {
             <div>
               <h3 className="font-bold mb-4">Resources</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:underline">How It Works</a></li>
-                <li><a href="#" className="hover:underline">Sign Up</a></li>
-                <li><a href="#" className="hover:underline">Support</a></li>
+                <li><a href="/howitworks" className="hover:underline">How It Works</a></li>
+                <li><a href="" className="hover:underline">Sign Up</a></li>
+                <li><a href="" className="hover:underline">Support</a></li>
               </ul>
             </div>
             <div>

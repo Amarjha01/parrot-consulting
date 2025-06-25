@@ -34,13 +34,13 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="relative z-50 mb-[8%] bg-gradient-to-br from-white via-gray-100 to-gray-300">
-    
+      <nav className="relative z-50 mb-[20%] md:mb-[6.2%] 2xl:mb-[5%] ">
+    {/* bg-[#ffedae80] */}
 
         {/* Main navbar container */}
-<div className="w-full bg-white/40 backdrop-blur-md fixed top-0 shadow-md border-b border-white/20 z-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="py-5 px-2 flex items-center justify-between">
+<div className="max-w-[1500px] w-[100vw] px-10  backdrop-blur-xl fixed top-0 shadow-md border-b border-white/20 z-50">
+          <div className="">
+            <div className="py-3 px-2 flex items-center justify-between">
               {/* Left Side - Logo */}
               <div className="flex items-center flex-shrink-0">
                 

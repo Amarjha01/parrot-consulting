@@ -567,7 +567,6 @@ const [hoveredCard, setHoveredCard] = useState(null);
           </div>
         </div>
       </div>
-      <Footer/>
     </div>
   );
 };

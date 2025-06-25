@@ -65,14 +65,9 @@ export default function ConsultantManager() {
     );
   }
 
-  // Show detailed view if consultant is selected
-  if (selectedConsultant) {
-    return <ConsultantDetailView consultant={selectedConsultant} onBack={handleBackToList} />;
-  }
-
   // Show consultants list
   return (
-    <MeetExperts consultants={consultants} onViewProfile={handleViewProfile} />
+    <MeetExperts consultants={consultants}  />
   );
 }
 

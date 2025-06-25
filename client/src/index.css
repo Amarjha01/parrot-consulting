@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
-body {
-  @apply bg-gradient-to-br from-white via-gray-100 to-gray-300;
+
+html{
+  max-width: 1500px;
+ margin-left: auto;
+ margin-right: auto;
+overflow-x: hidden;
 }

@@ -32,7 +32,7 @@ const ConsultantForm = () => {
               </div>
             </div>
             <div className="p-8">
-              {/* <ConsultantApplicationForm /> */}
+              <ConsultantApplicationForm />
             </div>
           </div>
         </div>

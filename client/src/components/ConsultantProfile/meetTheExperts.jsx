@@ -1,26 +1,36 @@
 import React, { useState } from "react";
-import ConsultantCard from "./ConsultantCard"; // make sure path is correct
-
+import ConsultantCard from "./ConsultantCard";
 import ConsultantBookingForm from "../../forms/BookingForm";
-import LoginSignupModal from "../../forms/loginSignup";
-
+import { Link } from "react-router-dom";
+import { ArrowRight, Eye } from "lucide-react";
 export default function MeetExperts({ consultants, onViewProfile }) {
   const [selectedConsultant, setSelectedConsultant] = useState(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [isLoginOpen, setLoginOpen] = useState(false);
 
   const handleBookNow = (consultant) => {
     const user = JSON.parse(localStorage.getItem("user"));
-   
-      setSelectedConsultant(consultant);
-      setIsBookingOpen(true); // open booking form
-
+    setSelectedConsultant(consultant);
+    setIsBookingOpen(true);
   };
 
   return (
     <section className="py-12 bg-white">
-      <div className="max-w-screen-xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">
+    
+      <div className="px-4 overflow-hidden relative">
+        <Link to={'/ViewAllConsultants'}>
+         <div className=" absolute right-5 group cursor-pointer px-3 py-1.5 md:px-6 md:py-3 rounded-xl bg-amber-200 hover:bg-amber-300 shadow-lg hover:shadow-amber-400/50 transform hover:scale-105 transition-all duration-300 border-2 border-amber-300 hover:border-amber-400  overflow-hidden">
+          <div className="flex items-center gap-2 relative z-10">
+            <Eye className="w-4 h-4 text-amber-800" />
+            <span className="font-bold text-amber-800 tracking-wide text-sm uppercase">
+              VIEW ALL
+            </span>
+            <ArrowRight className="w-4 h-4 text-amber-800 group-hover:translate-x-1 transition-transform duration-200" />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12"></div>
+        </div>
+        </Link>
+    
+        <h2 className="text-xl font-bold md:text-3xl mb-12">
           Meet Our Experts
         </h2>
 
@@ -29,27 +39,41 @@ export default function MeetExperts({ consultants, onViewProfile }) {
             No consultants available at the moment.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-            {consultants.map((consultant) => (
-              <ConsultantCard
-                key={consultant._id}
-                consultant={consultant}
-                onViewProfile={onViewProfile}
-                onBookNow={handleBookNow} 
-              />
-            ))}
+          <div className="relative overflow-hidden w-full">
+            <style>{marqueeStyle}</style>
+           <div className="marquee gap-6">
+              {[...consultants, ...consultants].map((consultant, index) => (
+                <div key={index}>
+                  <ConsultantCard
+                    consultant={consultant}
+                    onViewProfile={onViewProfile}
+                    onBookNow={handleBookNow}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Booking Form Modal */}
       <ConsultantBookingForm
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         preSelectedConsultant={selectedConsultant}
       />
-      
-
     </section>
   );
 }
+
+const marqueeStyle = `
+  @keyframes scroll-left {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .marquee {
+    animation: scroll-left 30s linear infinite;
+    display: flex;
+    width: max-content;
+  }
+`;

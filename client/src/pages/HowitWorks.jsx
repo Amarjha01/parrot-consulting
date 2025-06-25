@@ -197,7 +197,6 @@ const steps = [
           ))}
         </div>
       </div>
-    <Footer/>
     </div>
   );
 };

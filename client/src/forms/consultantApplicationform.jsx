@@ -124,6 +124,29 @@ export default function ConsultantApplicationForm() {
     ]);
   };
 
+    const validateFields = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.password.trim()) newErrors.password = "Password is required";
+    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
+    if (!formData.address.trim()) newErrors.address = "Address is required";
+    if (!formData.experience.trim()) newErrors.experience = "Experience is required";
+    if (!formData.primaryCategory.trim()) newErrors.primaryCategory = "Primary category is required";
+    if (!formData.specializedServices.trim()) newErrors.specializedServices = "Specialized services are required";
+    if (!formData.keySkills.trim()) newErrors.keySkills = "Key skills are required";
+    if (!formData.hourlyRate.trim()) newErrors.hourlyRate = "Hourly rate is required";
+    if (!formData.acceptedTerms) newErrors.acceptedTerms = "You must accept the terms and conditions";
+
+    if (!files.profilePicture) newErrors.profilePicture = "Profile picture is required";
+    if (!files.resume) newErrors.resume = "Resume is required";
+    if (!files.aadhaarCard) newErrors.aadhaarCard = "Aadhaar card is required";
+    if (!files.panCard) newErrors.panCard = "PAN card is required";
+
+    setErrorMessages(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -251,8 +274,6 @@ export default function ConsultantApplicationForm() {
         submissionData.append("certificates", file);
       });
 
-      // Debug: Log FormData contents
-      console.log("FormData contents:");
       for (let [key, value] of submissionData.entries()) {
         console.log(key, value instanceof File ? `File: ${value.name}` : value);
       }
