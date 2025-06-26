@@ -19,6 +19,9 @@ import ConsultantApplicationForm from '../forms/consultantApplicationform';
 import ViewAllConsultants from '../components/ConsultantProfile/ViewAllConsultant';
 import AdminDashboard from '../pages/AdminDashboard';
 import ConsultantDashboard from '../pages/ConsultantDashboard';
+import Login from '../components/global/Login';
+import LoginSignupModal from '../forms/loginSignup';
+import MeetingRoom from '../videoroom/meeting';
 
 const routes = createBrowserRouter([
   {
@@ -62,7 +65,9 @@ const routes = createBrowserRouter([
           </ProtectedRoute>
         )
       },
-       { path: 'login', element: <ViewAllConsultants /> },
+      { path: 'login', element: <LoginSignupModal /> },
+      { path: '/meeting/:bookingId', element: <MeetingRoom /> },
+
 ]);
 
 export default routes;
