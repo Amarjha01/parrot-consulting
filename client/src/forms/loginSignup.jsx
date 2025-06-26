@@ -97,7 +97,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
           switch (role) {
             case 'user':
               localStorage.setItem("user", JSON.stringify(userData));
-              navigate('/userdashboard');
+              // navigate('');
               break;
             default:
               alert("Unknown role: " + role + ". Redirecting to homepage.");
