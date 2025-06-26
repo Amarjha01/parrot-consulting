@@ -34,8 +34,12 @@ export default function Navbar() {
 
   return (
     <>
+
       <nav className="relative z-50 mb-[20%] md:mb-[6.2%] 2xl:mb-[5%] ">
     {/* bg-[#ffedae80] */}
+
+    
+
 
         {/* Main navbar container */}
 <div className="max-w-[1500px] w-[100vw] px-10  backdrop-blur-xl fixed top-0 shadow-md border-b border-white/20 z-50">

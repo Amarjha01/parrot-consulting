@@ -61,3 +61,15 @@ export const  createOrder  = async (data) => {
   }
 }
 
+
+
+
+export const getBookingById = async (bookingId) => {
+  try {
+    const response = await API.get(`/booking/booking/${bookingId}`);
+    console.log("Booking API Response:", response.data); 
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

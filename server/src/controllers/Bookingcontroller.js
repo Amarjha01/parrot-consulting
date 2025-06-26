@@ -52,7 +52,7 @@ export const confirmBooking = asyncHandler(async (req, res) => {
     bookingId,
     { status: "scheduled" },
     { new: true }
-  );
+  ).populate("consultant");
 
   if (!booking) {
     throw new ApiError(404, "Booking not found");
@@ -76,4 +76,16 @@ export const getBookingsByConsultantId = asyncHandler(async (req, res) => {
   }).populate("user", "name"); // Only populates the name field of the user
 
   return res.status(200).json(new ApiResponse(200, bookings));
+});
+
+
+
+export const getBookingById = asyncHandler(async (req, res) => {
+  const booking = await Booking.findById(req.params.id).populate("user consultant");
+
+  if (!booking) {
+    throw new ApiError(404, "Booking not found");
+  }
+
+  return res.status(200).json(new ApiResponse(200, booking));
 });

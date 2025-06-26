@@ -14,12 +14,19 @@ import AboutUsPage from "./pages/AboutUs";
 import ConsultantForm from "./components/global/ConsultantForm.jsx";
 import Navbar from "./components/global/navbar.jsx";
 import ConsultantDetailView from "./components/ConsultantProfile/consultantDetailView.jsx";
+
 import Footer from "./components/global/footer.jsx";
 import ViewAllConsultants from "./components/ConsultantProfile/ViewAllConsultant.jsx";
+
+import MeetingRoom from "./videoroom/meeting.jsx";
+// import AdminDashboard from './pages/AdminDashboard';
+// import PendingConsultants from './pages/PendingConsultants';
+
 
 const App = () => {
   return (
     <>
+
     <Navbar />
 
        <Routes >
@@ -59,10 +66,19 @@ const App = () => {
           }
         />
         
-    </Routes>
-   <Footer />
-    </>
    
+   
+
+
+
+         
+          <Route path="/meeting/:bookingId" element={<MeetingRoom />} />
+
+   
+        </Routes>
+      <Footer />
+
+    </>
   );
 };
 
