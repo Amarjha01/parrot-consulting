@@ -205,144 +205,274 @@ export default function MeetingRoom() {
   const peerConnection = useRef(null);
   const localStream = useRef(null);
 
+  // useEffect(() => {
+  //   const init = async () => {
+  //     try {
+  //       const booking = await getBookingById(bookingId);
+
+  //       const rawUser =
+  //         localStorage.getItem("user") || localStorage.getItem("consultant");
+  //       if (!rawUser) throw new Error("User not logged in");
+
+  //       const parsed = JSON.parse(rawUser);
+  //       const currentUser = parsed.data || parsed; // If wrapped in API response
+
+  //       const consultantId =
+  //         typeof booking.consultant === "object"
+  //           ? booking.consultant._id
+  //           : booking.consultant;
+  //       const userId =
+  //         typeof booking.user === "object" ? booking.user._id : booking.user;
+
+  //       const isConsultant = currentUser._id === consultantId;
+  //       const isUser = currentUser._id === userId;
+
+  //       if (!isConsultant && !isUser) {
+  //         alert("Unauthorized");
+  //         return navigate("/");
+  //       }
+
+  //       setAccessAllowed(true);
+  //       await setupWebRTC(bookingId);
+  //     } catch (err) {
+  //       console.error("Meeting setup failed:", err);
+  //       alert("Error joining meeting.");
+  //       navigate("/");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   init();
+  // }, [bookingId]);
+
+  // const setupWebRTC = async (roomId) => {
+  //   let isOfferer = false;
+
+  //   try {
+  //     // Wait until the refs are ready
+  //     if (!localVideo.current || !remoteVideo.current) {
+  //       console.warn("Video refs not mounted yet. Retrying...");
+  //       setTimeout(() => setupWebRTC(roomId), 100); // retry after 100ms
+  //       return;
+  //     }
+
+  //     const stream = await navigator.mediaDevices.getUserMedia({
+  //       video: true,
+  //       audio: true,
+  //     });
+  //     localVideo.current.srcObject = stream;
+  //     localStream.current = stream;
+
+  //     peerConnection.current = new RTCPeerConnection({
+  //       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  //     });
+
+  //     stream.getTracks().forEach((track) => {
+  //       peerConnection.current.addTrack(track, stream);
+  //     });
+
+  //     peerConnection.current.ontrack = (event) => {
+  //       console.log("🎥 Remote stream received");
+  //       if (remoteVideo.current) {
+  //         remoteVideo.current.srcObject = event.streams[0];
+  //       }
+  //     };
+
+  //     peerConnection.current.onicecandidate = (e) => {
+  //       if (e.candidate) {
+  //         socket.emit("ice-candidate", { candidate: e.candidate, roomId });
+  //       }
+  //     };
+
+  //     // Setup socket event listeners
+  //     socket.off("ready");
+  //     socket.off("offer");
+  //     socket.off("answer");
+  //     socket.off("ice-candidate");
+
+  //     const clientId = socket.id; // Available once socket connects
+  //     let hasSentOffer = false;
+
+  //     socket.on("ready", async () => {
+  //       if (!hasSentOffer) {
+  //         hasSentOffer = true;
+  //         console.log("🔔 Ready received — sending offer");
+  //         const offer = await peerConnection.current.createOffer();
+  //         await peerConnection.current.setLocalDescription(offer);
+  //         socket.emit("offer", { sdp: offer, roomId });
+  //       }
+  //     });
+
+  //     socket.on("offer", async (sdp) => {
+  //       console.log("📩 Offer received");
+  //       await peerConnection.current.setRemoteDescription(
+  //         new RTCSessionDescription(sdp)
+  //       );
+  //       const answer = await peerConnection.current.createAnswer();
+  //       await peerConnection.current.setLocalDescription(answer);
+  //       socket.emit("answer", { sdp: answer, roomId });
+  //     });
+
+  //     socket.on("answer", async (sdp) => {
+  //       console.log("✅ Answer received");
+  //       await peerConnection.current.setRemoteDescription(
+  //         new RTCSessionDescription(sdp)
+  //       );
+  //     });
+
+  //     socket.on("ice-candidate", async ({ candidate }) => {
+  //       if (candidate) {
+  //         try {
+  //           console.log("🌍 ICE Candidate received");
+  //           await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+  //         } catch (err) {
+  //           console.error("❌ Failed to add ICE candidate", candidate, err);
+  //         }
+  //       } else {
+  //         console.warn("⚠️ Received null or invalid ICE candidate");
+  //       }
+  //     });
+      
+
+  //     // Now that listeners are ready, join the room
+  //     socket.emit("join-room", roomId);
+  //   } catch (err) {
+  //     console.error("🚫 Media error:", err);
+  //     alert("Camera/mic access failed. Please check browser permissions.");
+  //   }
+  // };
   useEffect(() => {
     const init = async () => {
       try {
         const booking = await getBookingById(bookingId);
-
         const rawUser =
           localStorage.getItem("user") || localStorage.getItem("consultant");
         if (!rawUser) throw new Error("User not logged in");
-
+  
         const parsed = JSON.parse(rawUser);
-        const currentUser = parsed.data || parsed; // If wrapped in API response
-
+        const currentUser = parsed.data || parsed;
+  
         const consultantId =
           typeof booking.consultant === "object"
             ? booking.consultant._id
             : booking.consultant;
         const userId =
           typeof booking.user === "object" ? booking.user._id : booking.user;
-
+  
         const isConsultant = currentUser._id === consultantId;
         const isUser = currentUser._id === userId;
-
+  
         if (!isConsultant && !isUser) {
           alert("Unauthorized");
           return navigate("/");
         }
-
+  
         setAccessAllowed(true);
+  
+        // ❗Only call setupWebRTC ONCE
         await setupWebRTC(bookingId);
       } catch (err) {
-        console.error("Meeting setup failed:", err);
-        alert("Error joining meeting.");
+        console.error("Initialization failed:", err);
+        alert("Failed to join meeting.");
         navigate("/");
       } finally {
         setLoading(false);
       }
     };
-
+  
     init();
   }, [bookingId]);
-
+  
+  
   const setupWebRTC = async (roomId) => {
     let isOfferer = false;
-
+  
     try {
-      // Wait until the refs are ready
-      if (!localVideo.current || !remoteVideo.current) {
-        console.warn("Video refs not mounted yet. Retrying...");
-        setTimeout(() => setupWebRTC(roomId), 100); // retry after 100ms
-        return;
-      }
-
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
-      localVideo.current.srcObject = stream;
+  
       localStream.current = stream;
-
+  
+      if (localVideo.current) {
+        localVideo.current.srcObject = stream;
+      }
+  
       peerConnection.current = new RTCPeerConnection({
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
       });
-
-      stream.getTracks().forEach((track) => {
-        peerConnection.current.addTrack(track, stream);
-      });
-
+  
+      stream.getTracks().forEach((track) =>
+        peerConnection.current.addTrack(track, stream)
+      );
+  
       peerConnection.current.ontrack = (event) => {
         console.log("🎥 Remote stream received");
         if (remoteVideo.current) {
           remoteVideo.current.srcObject = event.streams[0];
         }
       };
-
-      peerConnection.current.onicecandidate = (e) => {
-        if (e.candidate) {
-          socket.emit("ice-candidate", { candidate: e.candidate, roomId });
+  
+      peerConnection.current.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit("ice-candidate", { candidate: event.candidate, roomId });
         }
       };
-
-      // Setup socket event listeners
+  
+      // Clear previous listeners
       socket.off("ready");
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
-
-      const clientId = socket.id; // Available once socket connects
-      let hasSentOffer = false;
-
+  
+      // Join room and determine if offerer
+      socket.emit("join-room", roomId, (clientCount) => {
+        console.log("Joined room. Total clients:", clientCount);
+        if (clientCount === 1) {
+          isOfferer = true;
+        }
+      });
+  
       socket.on("ready", async () => {
-        if (!hasSentOffer) {
-          hasSentOffer = true;
-          console.log("🔔 Ready received — sending offer");
+        if (isOfferer) {
+          console.log("📤 Creating offer...");
           const offer = await peerConnection.current.createOffer();
           await peerConnection.current.setLocalDescription(offer);
           socket.emit("offer", { sdp: offer, roomId });
         }
       });
-
+  
       socket.on("offer", async (sdp) => {
         console.log("📩 Offer received");
-        await peerConnection.current.setRemoteDescription(
-          new RTCSessionDescription(sdp)
-        );
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(sdp));
         const answer = await peerConnection.current.createAnswer();
         await peerConnection.current.setLocalDescription(answer);
         socket.emit("answer", { sdp: answer, roomId });
       });
-
+  
       socket.on("answer", async (sdp) => {
         console.log("✅ Answer received");
-        await peerConnection.current.setRemoteDescription(
-          new RTCSessionDescription(sdp)
-        );
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(sdp));
       });
-
+  
       socket.on("ice-candidate", async ({ candidate }) => {
         if (candidate) {
           try {
-            console.log("🌍 ICE Candidate received");
             await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
           } catch (err) {
-            console.error("❌ Failed to add ICE candidate", candidate, err);
+            console.error("❌ Failed to add ICE candidate:", err);
           }
-        } else {
-          console.warn("⚠️ Received null or invalid ICE candidate");
         }
       });
-      
-
-      // Now that listeners are ready, join the room
-      socket.emit("join-room", roomId);
     } catch (err) {
-      console.error("🚫 Media error:", err);
-      alert("Camera/mic access failed. Please check browser permissions.");
+      console.error("🚫 setupWebRTC error:", err);
+      alert("Could not access camera/mic or establish connection.");
     }
   };
-
+  
+  
   const toggleMute = () => {
     if (localStream.current) {
       const audioTrack = localStream.current.getAudioTracks()[0];

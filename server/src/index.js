@@ -33,7 +33,7 @@ const server = createServer(app);
 // Setup socket.io
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN,
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -42,17 +42,33 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   // Join Room Logic
-  socket.on("join-room", (roomId) => {
-    socket.join(roomId);
+  // socket.on("join-room", (roomId) => {
+  //   socket.join(roomId);
 
+  //   const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
+  //   console.log(`User ${socket.id} joined room ${roomId}. Total: ${clients.length}`);
+
+  //   if (clients.length === 2) {
+  //     // Notify both participants that room is ready
+  //     io.to(roomId).emit("ready");
+  //   }
+  // });
+
+  socket.on("join-room", (roomId, callback) => {
+    socket.join(roomId);
     const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
     console.log(`User ${socket.id} joined room ${roomId}. Total: ${clients.length}`);
-
+  
+    if (typeof callback === "function") {
+      callback(clients.length);
+    }
+  
     if (clients.length === 2) {
-      // Notify both participants that room is ready
       io.to(roomId).emit("ready");
     }
   });
+  
+  
 
   // Handle client asking who is in the room
   socket.on("get-room-users", (roomId, callback) => {

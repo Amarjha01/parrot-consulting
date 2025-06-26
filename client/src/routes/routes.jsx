@@ -19,7 +19,6 @@ import ConsultantApplicationForm from '../forms/consultantApplicationform';
 import ViewAllConsultants from '../components/ConsultantProfile/ViewAllConsultant';
 import AdminDashboard from '../pages/AdminDashboard';
 import ConsultantDashboard from '../pages/ConsultantDashboard';
-import Login from '../components/global/Login';
 import LoginSignupModal from '../forms/loginSignup';
 import MeetingRoom from '../videoroom/meeting';
 
