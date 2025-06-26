@@ -1,9 +1,8 @@
 import React from "react";
 import { MapPin, Clock, DollarSign, Languages } from "lucide-react";
-
+import { Link } from "react-router-dom";
 export default function ConsultantCard({
   consultant,
-  onViewProfile,
   onBookNow,
 }) {
   const {
@@ -15,6 +14,7 @@ export default function ConsultantCard({
     hourlyRate,
     experience,
     availabilityPerWeek,
+    _id
   } = consultant;
 
   return (
@@ -86,12 +86,14 @@ export default function ConsultantCard({
       </div>
 
       <div className="flex justify-center gap-3">
+         <Link to={`/consultantprofile/${_id}/${name}`}>
         <button
-          onClick={() => onViewProfile(consultant)}
+        
           className="px-6 py-2 rounded-lg text-teal-800 font-semibold border-2 border-teal-800 bg-transparent hover:bg-teal-900 hover:text-white transition-all duration-300"
         >
           View Profile
         </button>
+        </Link>
         <button
           onClick={() => onBookNow(consultant)}
           className="px-6 py-2 rounded-lg text-white bg-teal-800 hover:bg-teal-900 transition-all duration-300"

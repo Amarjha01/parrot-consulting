@@ -62,7 +62,6 @@ const PopularCategoriesPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-amber-50/30">
-        <Navbar/>
       {/* Hero Section */}
       <div className="relative overflow-hidden py-20 sm:py-32">
         {/* Background decoration */}
@@ -201,7 +200,6 @@ const PopularCategoriesPage = () => {
           </div>
         </div>
       </div>
-      <Footer/>
     </div>
   );
 };

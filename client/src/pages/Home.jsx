@@ -9,18 +9,18 @@ import Navbar from '../components/global/navbar'
 import CallToAction from '../components/Home/callToAction'
 
 import ConsultantManager from '../components/ConsultantProfile/ConsultantManager'
+import FAQ from '../components/Home/FAQ'
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-amber-50">
-      <Navbar />
+    <div className="min-h-screen ">
       <Hero />
       <PopularCategories />
       <HowItWorks />
       <ConsultantManager/>
+      <FAQ />
       <Testimonials />
       <CallToAction/>
-      <Footer />
     </div>
   )
 }

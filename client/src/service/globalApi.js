@@ -19,4 +19,13 @@ export const globalconsultantdetails = async () => {
       throw error.response?.data || error;
     }
   };
+export const viewSingleConsultant = async (id) => {
+    try {
+      const response = await API.post("/global/viewSingleConsultant" , 
+        {id});
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
   

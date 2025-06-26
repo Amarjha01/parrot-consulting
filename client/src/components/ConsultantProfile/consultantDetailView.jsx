@@ -1,8 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {  MapPin, Clock, Star, Mail, Phone,  BookOpen, Award, Languages, Briefcase, ArrowLeft, ExternalLink } from "lucide-react";
 import { useParams } from "react-router-dom";
-export default function ConsultantDetailView({ consultant, onBack }) {
-    const {
+import { viewSingleConsultant } from "../../service/globalApi";
+export default function ConsultantDetailView({  }) {
+   
+   const { id } = useParams();
+   const [consultants , setConsultants] = useState();
+   
+     useEffect(() => {
+       const fetchConsultants = async () => {
+         try {
+           const response = await viewSingleConsultant(id);
+           setConsultants(response.data || []);
+         } catch (err) {
+           setError(err.message || "Failed to fetch consultants");
+           console.error("Error fetching consultants:", err);
+         }
+       };
+   
+       fetchConsultants();
+     }, [id]);
+     
+if (!consultants) return <div>Loading...</div>;
+      const {
       name,
       email,
       phoneNumber,
@@ -18,20 +38,13 @@ export default function ConsultantDetailView({ consultant, onBack }) {
       preferredWorkingHours,
       bookingLeadTime,
       education,
-      certificates
-    } = consultant;
-   const { id } = useParams();
+      certificates,
+    } = consultants;
     return (
-     <div className=" relative w-full flex justify-center items-center">
-       <div className=" absolute w-[60vw]  z-30  mx-auto p-8 m-4 bg-white">
+     <div className=" h-fit w-full flex justify-center items-center">
+       <div className="  w-full z-30  mx-auto p-8 m-4 bg-white">
         {/* Header */}
         <div className="flex items-center mb-6">
-          <button 
-            onClick={onBack}
-            className="mr-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6 text-teal-800" />
-          </button>
           <h1 className="text-3xl font-bold text-gray-800">Consultant Profile</h1>
         </div>
   
@@ -49,7 +62,16 @@ export default function ConsultantDetailView({ consultant, onBack }) {
               />
             </div>
             
-            <div className="flex-1 text-center md:text-left">
+            <div className=" relative flex-1 text-center md:text-left">
+               {/* Action Buttons */}
+        <div className="flex justify-center gap-4 absolute right-[10%]">
+          <button className="px-8 py-3 bg-teal-800 text-white rounded-lg hover:bg-teal-900 transition-colors font-semibold">
+            Book Consultation
+          </button>
+          <button className="px-8 py-3 border-2 border-teal-800 text-teal-800 rounded-lg hover:bg-teal-800 hover:text-white transition-colors font-semibold">
+            Send Message
+          </button>
+        </div>
               <h2 className="text-4xl font-bold text-gray-800 mb-2">{name}</h2>
               <p className="text-xl text-teal-700 font-semibold mb-4">{primaryCategory}</p>
               
@@ -198,15 +220,7 @@ export default function ConsultantDetailView({ consultant, onBack }) {
           </div>
         )}
   
-        {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
-          <button className="px-8 py-3 bg-teal-800 text-white rounded-lg hover:bg-teal-900 transition-colors font-semibold">
-            Book Consultation
-          </button>
-          <button className="px-8 py-3 border-2 border-teal-800 text-teal-800 rounded-lg hover:bg-teal-800 hover:text-white transition-colors font-semibold">
-            Send Message
-          </button>
-        </div>
+       
       </div>
      </div>
     );
