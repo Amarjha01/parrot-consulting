@@ -11,13 +11,39 @@ export default function Navbar() {
   const [userRole, setUserRole] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false); // for mobile toggle
 
+  // useEffect(() => {
+  //   const consultant = localStorage.getItem("consultant");
+  //   const user = localStorage.getItem("user");
+  //   if (consultant) setUserRole("consultant");
+  //   else if (user) setUserRole("user");
+  //   else setUserRole(null);
+  // }, []);
+
   useEffect(() => {
-    const consultant = localStorage.getItem("consultant");
-    const user = localStorage.getItem("user");
-    if (consultant) setUserRole("consultant");
-    else if (user) setUserRole("user");
-    else setUserRole(null);
+    const updateRole = () => {
+      const consultant = localStorage.getItem("consultant");
+      const user = localStorage.getItem("user");
+      if (consultant) setUserRole("consultant");
+      else if (user) setUserRole("user");
+      else setUserRole(null);
+    };
+  
+    updateRole(); // run on mount
+  
+    window.addEventListener("storage", updateRole); // run if changed in another tab
+    return () => window.removeEventListener("storage", updateRole);
   }, []);
+
+  useEffect(() => {
+    if (!showLoginSignup) {
+      const consultant = localStorage.getItem("consultant");
+      const user = localStorage.getItem("user");
+      if (consultant) setUserRole("consultant");
+      else if (user) setUserRole("user");
+      else setUserRole(null);
+    }
+  }, [showLoginSignup]);
+  
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -34,49 +60,44 @@ export default function Navbar() {
 
   return (
     <>
-
       <nav className="relative z-50 mb-[20%] md:mb-[6.2%] 2xl:mb-[5%] ">
-    {/* bg-[#ffedae80] */}
-
-    
-
+        {/* bg-[#ffedae80] */}
 
         {/* Main navbar container */}
-<div className="max-w-[1500px] w-[100vw] px-10  backdrop-blur-xl fixed top-0 shadow-md border-b border-white/20 z-50">
+        <div className="max-w-[1500px] w-[100vw] px-10  backdrop-blur-xl fixed top-0 shadow-md border-b border-white/20 z-50">
           <div className="">
             <div className="py-3 px-2 flex items-center justify-between">
               {/* Left Side - Logo */}
               <div className="flex items-center flex-shrink-0">
-                
-                 <Link to={'/'}> <img
-                    src="/parrot1.png" 
-                    alt="Logo"
-                    className="h-15 w-auto" 
-                  /></Link>
-             
+                <Link to={"/"}>
+                  {" "}
+                  <img src="/parrot1.png" alt="Logo" className="h-15 w-auto" />
+                </Link>
               </div>
 
               {/* Center - Navigation Links (Desktop) */}
               <div className="hidden lg:flex items-center justify-center flex-1 ml-12">
                 <div className="flex items-center space-x-10">
-                  {["Home","Categories", "How It Works", "About"].map((item) => {
-                    let path = "#";
-                    if (item === "How It Works") path = "/howitworks";
-                    if (item === "Home") path = "/";
-                    else if (item === "Categories") path = "/categories";
-                    else if (item === "About") path = "/aboutus";
+                  {["Home", "Categories", "How It Works", "About"].map(
+                    (item) => {
+                      let path = "#";
+                      if (item === "How It Works") path = "/howitworks";
+                      if (item === "Home") path = "/";
+                      else if (item === "Categories") path = "/categories";
+                      else if (item === "About") path = "/aboutus";
 
-                    return (
-                      <Link
-                        key={item}
-                        to={path}
-                        className=" text-gray-700 hover:text-emerald-600 font-semibold text-lg transition-all duration-300 py-2 px-4 rounded-xl hover:bg-emerald-50/80"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {item}
-                      </Link>
-                    );
-                  })}
+                      return (
+                        <Link
+                          key={item}
+                          to={path}
+                          className=" text-gray-700 hover:text-emerald-600 font-semibold text-lg transition-all duration-300 py-2 px-4 rounded-xl hover:bg-emerald-50/80"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {item}
+                        </Link>
+                      );
+                    }
+                  )}
                 </div>
               </div>
 
@@ -158,7 +179,9 @@ export default function Navbar() {
                   <>
                     <button
                       onClick={handleDashboardRedirect}
-                      className={`bg-gradient-to-r from-emerald-500 to-green-500 text-white font-semibold px-6 py-3 rounded-full hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${ !userRole ? "hidden" : "flex"}`}
+                      className={`bg-gradient-to-r from-emerald-500 to-green-500 text-white font-semibold px-6 py-3 rounded-full hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                        userRole 
+                      }`}
                     >
                       <span className="flex items-center space-x-2">
                         <svg
@@ -217,24 +240,26 @@ export default function Navbar() {
                 <div className="px-6 py-6 space-y-6">
                   {/* Mobile Navigation Links */}
                   <div className="flex flex-col space-y-4">
-                         {["Home" , "Categories", "How It Works", "About"].map((item) => {
-                    let path = "#";
-                    if (item === "How It Works") path = "/howitworks";
-                    if (item === "Home") path = "/";
-                    else if (item === "Categories") path = "/categories";
-                    else if (item === "About") path = "/aboutus";
+                    {["Home", "Categories", "How It Works", "About"].map(
+                      (item) => {
+                        let path = "#";
+                        if (item === "How It Works") path = "/howitworks";
+                        if (item === "Home") path = "/";
+                        else if (item === "Categories") path = "/categories";
+                        else if (item === "About") path = "/aboutus";
 
-                    return (
-                      <Link
-                        key={item}
-                        to={path}
-                        className="relative text-gray-700 hover:text-emerald-600 font-semibold text-lg transition-all duration-300 group py-2 px-4 rounded-xl hover:bg-emerald-50/80"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {item}
-                      </Link>
-                    );
-                  })}
+                        return (
+                          <Link
+                            key={item}
+                            to={path}
+                            className="relative text-gray-700 hover:text-emerald-600 font-semibold text-lg transition-all duration-300 group py-2 px-4 rounded-xl hover:bg-emerald-50/80"
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            {item}
+                          </Link>
+                        );
+                      }
+                    )}
                   </div>
 
                   {/* Mobile Auth Buttons */}
@@ -325,7 +350,10 @@ export default function Navbar() {
                 </button>
               </div>
             </div>
-            <div className="overflow-y-auto px-6 pb-8 pt-4" style={{ maxHeight: "calc(90vh - 88px)" }} >
+            <div
+              className="overflow-y-auto px-6 pb-8 pt-4"
+              style={{ maxHeight: "calc(90vh - 88px)" }}
+            >
               <ConsultantApplicationForm />
             </div>
           </div>

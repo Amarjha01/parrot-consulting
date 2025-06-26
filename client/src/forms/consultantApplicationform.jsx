@@ -717,9 +717,9 @@ export default function ConsultantApplicationForm() {
         {/* Availability & Pricing */}
         <div>
           <h3 className="text-xl font-bold mb-4">Availability & Pricing</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             <div>
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <label className="w-full">
                   <span className="block mb-2">
                     Availability Hours per Week
@@ -737,7 +737,7 @@ export default function ConsultantApplicationForm() {
                     {formData.availabilityPerWeek} hours
                   </div>
                 </label>
-              </div>
+              </div> */}
             </div>
             <div>
               <input
@@ -751,7 +751,7 @@ export default function ConsultantApplicationForm() {
                 min="0"
               />
             </div>
-            <div>
+            {/* <div>
               <select
                 name="preferredWorkingHours"
                 className="w-full border rounded p-2"
@@ -765,8 +765,8 @@ export default function ConsultantApplicationForm() {
                 <option value="night">Night (12AM - 6AM)</option>
                 <option value="flexible">Flexible</option>
               </select>
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <select
                 name="bookingLeadTime"
                 className="w-full border rounded p-2"
@@ -781,7 +781,7 @@ export default function ConsultantApplicationForm() {
                 <option value="7">1 week</option>
                 <option value="14">2 weeks</option>
               </select>
-            </div>
+            </div> */}
           </div>
         </div>
 

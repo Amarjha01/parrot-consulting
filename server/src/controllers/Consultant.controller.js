@@ -36,10 +36,10 @@ export const ApplyAsconsultant = asyncHandler(async (req, res) => {
     specializedServices,
     keySkills,
     languageProficiency,
-    availabilityPerWeek,
+    // availabilityPerWeek,
     hourlyRate,
-    preferredWorkingHours,
-    bookingLeadTime,
+    // preferredWorkingHours,
+    // bookingLeadTime,
     acceptedTerms,
     visibleOnPlatform,
     education,
@@ -130,10 +130,10 @@ export const ApplyAsconsultant = asyncHandler(async (req, res) => {
     keySkills: keySkillsArray,
     certificates: certifications,
     languageProficiency: languageProficiencyArray,
-    availabilityPerWeek,
+    // availabilityPerWeek,
     hourlyRate,
-    preferredWorkingHours,
-    bookingLeadTime,
+    // preferredWorkingHours,
+    // bookingLeadTime,
     acceptedTerms,
     visibleOnPlatform,
     weeklyAvailability: weeklyAvailabilityArray,
@@ -209,5 +209,3 @@ export const loginAsConsultant = asyncHandler(async (req, res) => {
     .cookie("refreshToken", refreshToken, options)
     .json(new ApiResponse(200, loggedinConsultant));
 });
-
-
