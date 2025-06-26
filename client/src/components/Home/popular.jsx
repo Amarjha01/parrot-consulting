@@ -8,6 +8,7 @@ import {
   Calendar,
   Star,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function PopularCategories() {
   const categories = [
@@ -36,6 +37,7 @@ export default function PopularCategories() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-items-center">
           {categories.map((category, index) => (
+           <Link to={'/ViewAllConsultants'}>
             <div
               key={index}
               className="bg-white w-[280px] text-center hover:shadow-lg transition py-8 rounded-2xl shadow"
@@ -44,6 +46,7 @@ export default function PopularCategories() {
               <h3 className="text-lg font-bold mb-2">{category.title}</h3>
               <p className="text-gray-600 text-sm">{category.description}</p>
             </div>
+           </Link>
           ))}
         </div>
       </div>

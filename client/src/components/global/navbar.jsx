@@ -78,7 +78,7 @@ export default function Navbar() {
               {/* Center - Navigation Links (Desktop) */}
               <div className="hidden lg:flex items-center justify-center flex-1 ml-12">
                 <div className="flex items-center space-x-10">
-                  {["Home", "Categories", "How It Works", "About"].map(
+                  {["Home" , "About" , "Categories", "How It Works"].map(
                     (item) => {
                       let path = "#";
                       if (item === "How It Works") path = "/howitworks";
@@ -131,8 +131,8 @@ export default function Navbar() {
               <div className="hidden lg:flex items-center space-x-4 flex-shrink-0 ">
                 {!userRole ? (
                   <>
+                 <Link to={'/login&signup'}>
                     <button
-                      onClick={() => setShowLoginSignup(true)}
                       className="relative overflow-hidden px-7 py-3 text-emerald-700 font-semibold border-2 border-emerald-500 rounded-full hover:text-white transition-all duration-300 group shadow-lg hover:shadow-xl"
                     >
                       <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-green-500 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
@@ -153,6 +153,7 @@ export default function Navbar() {
                         </svg>
                       </span>
                     </button>
+                 </Link>
                     <button
                       onClick={() => setShowConsultantForm(true)}
                       className=" bg-[#0d542b] overflow-hidden text-white px-7 py-3 rounded-full font-semibold  transform hover:scale-105 transition-all duration-300 hover:from-emerald-600 hover:to-green-600"
@@ -240,7 +241,7 @@ export default function Navbar() {
                 <div className="px-6 py-6 space-y-6">
                   {/* Mobile Navigation Links */}
                   <div className="flex flex-col space-y-4">
-                    {["Home", "Categories", "How It Works", "About"].map(
+                    {["Home" , "About" , "Categories", "How It Works"].map(
                       (item) => {
                         let path = "#";
                         if (item === "How It Works") path = "/howitworks";

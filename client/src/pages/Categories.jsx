@@ -97,6 +97,7 @@ const PopularCategoriesPage = () => {
             const isHovered = hoveredCategory === category.id;
             
             return (
+             <Link to={'/ViewAllConsultants'}>
               <div
                 key={category.id}
                 className={`group relative transition-all duration-700 ${
@@ -167,6 +168,7 @@ const PopularCategoriesPage = () => {
                   </div>
                 </div>
               </div>
+             </Link>
             );
           })}
         </div>
@@ -186,8 +188,8 @@ const PopularCategoriesPage = () => {
   </p>
 
   <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-   <Link to={'/'}>
-    <button className="bg-white text-emerald-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+   <Link to={'/ViewAllConsultants'}>
+    <button className="bg-white text-emerald-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer">
       Explore Consultants
     </button>
    </Link>

@@ -3,7 +3,7 @@ import { registerAsUser, loginAsUser } from "../service/userApi";
 import { loginAsConsultant } from "../service/consultantApi"; // ✅ Import consultant login API
 import { useNavigate } from "react-router-dom";
 
-const LoginSignupModal = ({ isOpen, onClose }) => {
+const LoginSignupModal = () => {
   const navigate = useNavigate();
   const [authMode, setAuthMode] = useState("login"); // 'login', 'signup', 'consultantLogin'
   const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +44,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
 
         await registerAsUser({ ...formData, role: "user" });
         alert("Signup successful!");
-        onClose();
+      
       } else if (authMode === 'login' || authMode === 'consultantLogin') {
         const loginFunction = authMode === 'login' ? loginAsUser : loginAsConsultant;
         const response = await loginFunction(formData);
@@ -72,7 +72,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
           localStorage.setItem("consultant", JSON.stringify(consultantData));
           
           alert("Consultant login successful!");
-          onClose();
+       
           navigate('/ConsultantDashboard');
           
         } else {
@@ -105,7 +105,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
           }
 
           alert(`${role.charAt(0).toUpperCase() + role.slice(1)} login successful!`);
-          onClose();
+      
         }
       }
     } catch (err) {
@@ -115,7 +115,7 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
     }
   };
 
-  if (!isOpen) return null;
+  
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -123,22 +123,9 @@ const LoginSignupModal = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-t-2xl text-center relative">
           <button
-            onClick={onClose}
+ 
             className="absolute top-4 right-4 text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
           </button>
           <div className="text-white">
             <h2 className="text-2xl font-bold mb-2">
