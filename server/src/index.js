@@ -77,13 +77,22 @@ io.on("connection", (socket) => {
   });
 
   // WebRTC signaling events
-  socket.on("offer", (data) => {
-    socket.to(data.roomId).emit("offer", data.sdp);
-  });
+  // socket.on("offer", (data) => {
+  //   socket.to(data.roomId).emit("offer", data.sdp);
+  // });
 
-  socket.on("answer", (data) => {
-    socket.to(data.roomId).emit("answer", data.sdp);
+  // socket.on("answer", (data) => {
+  //   socket.to(data.roomId).emit("answer", data.sdp);
+  // });
+
+  socket.on("offer", (data) => {
+    socket.to(data.roomId).emit("offer", { sdp: data.sdp }); // ✅ wrapped inside { sdp }
   });
+  
+  socket.on("answer", (data) => {
+    socket.to(data.roomId).emit("answer", { sdp: data.sdp }); // ✅ wrapped inside { sdp }
+  });
+  
 
   socket.on("ice-candidate", (data) => {
     socket.to(data.roomId).emit("ice-candidate", { candidate: data.candidate });
