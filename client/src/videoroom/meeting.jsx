@@ -3,8 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { getBookingById } from "../service/bookingApi";
 
-
-
 //local host
 // const socket = io(
 //   import.meta.env.VITE_API_BASE_URL || "http://localhost:8010",
@@ -15,7 +13,7 @@ import { getBookingById } from "../service/bookingApi";
 
 //production
 const socket = io(
-  import.meta.env.VITE_API_BASE_URL || "https://api.parrotconsult.com/api/v1",
+  import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com",
   {
     withCredentials: true,
   }
