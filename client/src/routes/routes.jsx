@@ -15,12 +15,13 @@ import AboutUsPage from '../pages/AboutUs';
 import ConsultantForm from '../components/global/ConsultantForm';
 import ConsultantDetailView from '../components/ConsultantProfile/consultantDetailView';
 import ConsultantProfile from '../pages/ConsultantProfile';
-import ConsultantApplicationForm from '../forms/consultantApplicationform';
 import ViewAllConsultants from '../components/ConsultantProfile/ViewAllConsultant';
 import AdminDashboard from '../pages/AdminDashboard';
 import ConsultantDashboard from '../pages/ConsultantDashboard';
 import LoginSignupModal from '../forms/loginSignup';
 import MeetingRoom from '../videoroom/meeting';
+import ConsultantApplicationForm from '../forms/ConsultantApplicationform';
+import ConsultantSignupForm from '../forms/ConsultantSignupForm';
 
 const routes = createBrowserRouter([
   {
@@ -66,7 +67,8 @@ const routes = createBrowserRouter([
       },
       { path: 'login&signup', element: <LoginSignupModal /> },
       { path: '/meeting/:bookingId', element: <MeetingRoom /> },
-      { path: '/', element: <MeetingRoom /> },
+      { path: '/consultantApplicationForm', element: <ConsultantApplicationForm /> },
+      { path: '/ConsultantSignupForm', element: <ConsultantSignupForm /> },
 
 ]);
 

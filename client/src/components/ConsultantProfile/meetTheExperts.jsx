@@ -26,16 +26,16 @@ export default function MeetExperts({ consultants, onViewProfile }) {
   }}
 >
   <div className="flex items-center gap-2 relative z-10">
-    <Eye className="w-4 h-4" style={{ color: '#153f39' }} />
+    <Eye className="w-4 h-4 text-white"  />
     <span
-      className="font-bold tracking-wide text-sm uppercase"
-      style={{ color: '#153f39' }}
+      className="font-bold tracking-wide text-sm uppercase text-white"
+      
     >
       VIEW ALL
     </span>
     <ArrowRight
-      className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"
-      style={{ color: '#153f39' }}
+      className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200 text-white"
+      
     />
   </div>
 

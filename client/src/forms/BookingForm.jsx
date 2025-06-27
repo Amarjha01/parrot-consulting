@@ -8,7 +8,6 @@ import {
   createOrder,
   creatependingBooking,
 } from "../service/bookingApi";
-import LoginSignupModal from "./loginSignup";
 
 const ConsultantBookingForm = ({ isOpen, onClose, preSelectedConsultant = null }) => {
   const [step, setStep] = useState(1);
@@ -20,7 +19,7 @@ const [selectedTime, setSelectedTime] = useState(now);
 
 
   const [duration, setDuration] = useState(30);
-  const [projectDetails, setProjectDetails] = useState("React App Debugging"); // Dummy value
+  const [projectDetails, setProjectDetails] = useState("Kindly enter the topic here....."); // Dummy value
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(!preSelectedConsultant);
@@ -115,7 +114,7 @@ const [selectedTime, setSelectedTime] = useState(now);
     const userEmail = user?.email;
 
     if (!user) {
-      setLoginOpen(true);
+      window.open('/login&signup', '_blank');
       return;
     }
 
@@ -209,8 +208,6 @@ const [selectedTime, setSelectedTime] = useState(now);
               placeholder="e.g. React App Debugging"
             />
           </div>
-
-          <LoginSignupModal isOpen={isLoginOpen} onClose={() => setLoginOpen(false)} />
 <button
   onClick={handleBookingSubmit}
   className="w-full bg-teal-600 text-white py-3 rounded hover:bg-teal-700 cursor-pointer"

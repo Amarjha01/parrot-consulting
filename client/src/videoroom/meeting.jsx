@@ -13,7 +13,7 @@ import { getBookingById } from "../service/bookingApi";
 
 //production
 const socket = io(
-  import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com",
+  import.meta.env.VITE_SOCKET_URL || "http://localhost:8010/api/v1",
   {
     withCredentials: true,
   }

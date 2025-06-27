@@ -1,5 +1,5 @@
 import React from 'react'
-import ConsultantApplicationForm from '../../forms/consultantApplicationform'
+import ConsultantApplicationForm from '../../forms/ConsultantApplicationform'
 
 const ConsultantForm = () => {
   return (

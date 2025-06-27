@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { registerAsUser, loginAsUser } from "../service/userApi";
-import { loginAsConsultant } from "../service/consultantApi"; // ✅ Import consultant login API
-import { useNavigate } from "react-router-dom";
+import { loginAsConsultant } from "../service/consultantApi";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Home } from 'lucide-react';
 
 const LoginSignupModal = () => {
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState("login"); // 'login', 'signup', 'consultantLogin'
+  const [authMode, setAuthMode] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,14 +18,13 @@ const LoginSignupModal = () => {
   });
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
-  const switchAuthMode = (mode) => {
-    setAuthMode(mode);
+  const resetForm = () => {
     setFormData({
       name: "",
       email: "",
@@ -33,316 +34,183 @@ const LoginSignupModal = () => {
     });
   };
 
+  const switchAuthMode = (mode) => {
+    setAuthMode(mode);
+    resetForm();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      if (authMode === 'signup') {
+      if (authMode === "signup") {
         if (formData.password !== formData.confirmPassword) {
           alert("Passwords do not match");
+          setLoading(false);
           return;
         }
-
         await registerAsUser({ ...formData, role: "user" });
         alert("Signup successful!");
-      
-      } else if (authMode === 'login' || authMode === 'consultantLogin') {
-        const loginFunction = authMode === 'login' ? loginAsUser : loginAsConsultant;
-        const response = await loginFunction(formData);
-        
-        console.log("Full API response:", response);
-        console.log("Response data:", response.data);
+        resetForm();
+        switchAuthMode("login");
+      } else {
+        const loginFn = authMode === "login" ? loginAsUser : loginAsConsultant;
+        const response = await loginFn(formData);
 
-        if (authMode === 'consultantLogin') {
-          // For consultant login, the data structure is response.data (which contains the consultant object)
+        // Clear old roles
+        ["user", "consultant", "admin"].forEach(r => localStorage.removeItem(r));
+
+        if (authMode === "consultantLogin") {
           const consultantData = response.data;
-          
-          console.log("Consultant data to store:", consultantData);
-
-          if (!consultantData) {
-            alert("Login succeeded but consultant data is missing. Check API response.");
-            return;
-          }
-
-          // Clear previous roles
-          localStorage.removeItem("admin");
-          localStorage.removeItem("consultant");
-          localStorage.removeItem("user");
-
-          // Store consultant data
+          if (!consultantData) throw new Error("No consultant data returned.");
           localStorage.setItem("consultant", JSON.stringify(consultantData));
-          
-          alert("Consultant login successful!");
-       
-          navigate('/ConsultantDashboard');
-          
         } else {
-          // For user login
           const userData = response.data?.status;
           const role = userData?.role?.toLowerCase();
-
-          console.log("Extracted role:", role);
-          console.log("User data to store:", userData);
-
-          if (!role) {
-            alert("Login succeeded but role is missing. Check API response.");
-            return;
-          }
-
-          // Clear previous roles
-          localStorage.removeItem("admin");
-          localStorage.removeItem("consultant");
-          localStorage.removeItem("user");
-
-          // Save role and redirect
-          switch (role) {
-            case 'user':
-              localStorage.setItem("user", JSON.stringify(userData));
-              // navigate('');
-              break;
-            default:
-              alert("Unknown role: " + role + ". Redirecting to homepage.");
-              navigate('/');
-          }
-
-          alert(`${role.charAt(0).toUpperCase() + role.slice(1)} login successful!`);
-      
+          if (!role) throw new Error("No user role found.");
+          localStorage.setItem(role, JSON.stringify(userData));
         }
+
+        alert("Login successful!");
+        resetForm();
+        navigate("/");
       }
     } catch (err) {
-      console.error("Login error:", err);
-      console.error("Error response:", err?.response);
+      console.error(err);
       alert(err?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
-  
-
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative animate-slideUp">
+    <div className="fixed inset-0 z-50 flex items-center justify-center  px-4">
+      <Link to="/" className="absolute top-5 left-5 flex items-center gap-1 text-green-700 hover:text-green-900">
+        <Home size={20} /> <span className="font-semibold uppercase">Home</span>
+      </Link>
+
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl animate-slideUp overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-t-2xl text-center relative">
-          <button
- 
-            className="absolute top-4 right-4 text-white/80 hover:text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200"
-          >
-          </button>
-          <div className="text-white">
-            <h2 className="text-2xl font-bold mb-2">
-              {authMode === "signup"
-                ? "Join Our Community"
-                : authMode === "consultantLogin"
-                ? "Welcome Consultant"
-                : "Welcome Back!"}
-            </h2>
-            <p className="text-green-100 text-sm">
-              {authMode === "signup"
-                ? "Create your account to get started"
-                : "Sign in to access your account"}
-            </p>
-          </div>
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-center text-white">
+          <h2 className="text-2xl font-bold mb-2">
+            {authMode === "signup"
+              ? "Join Our Community"
+              : authMode === "consultantLogin"
+              ? "Welcome Consultant"
+              : "Welcome Back!"}
+          </h2>
+          <p className="text-green-100 text-sm">
+            {authMode === "signup"
+              ? "Create your account to get started"
+              : "Sign in to access your account"}
+          </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex bg-gray-50 rounded-none">
-          <button
-            onClick={() => switchAuthMode("login")}
-            className={`flex-1 py-3 px-4 text-sm font-semibold transition-all duration-300 ${
-              authMode === "login"
-                ? "bg-white text-green-600 shadow-sm border-b-2 border-green-600"
-                : "text-gray-600 hover:text-green-600"
-            }`}
-          >
-            User Login
-          </button>
-          <button
-            onClick={() => switchAuthMode("signup")}
-            className={`flex-1 py-3 px-4 text-sm font-semibold transition-all duration-300 ${
-              authMode === "signup"
-                ? "bg-white text-green-600 shadow-sm border-b-2 border-green-600"
-                : "text-gray-600 hover:text-green-600"
-            }`}
-          >
-            Sign Up
-          </button>
-          <button
-            onClick={() => switchAuthMode("consultantLogin")}
-            className={`flex-1 py-3 px-4 text-sm font-semibold transition-all duration-300 ${
-              authMode === "consultantLogin"
-                ? "bg-white text-green-600 shadow-sm border-b-2 border-green-600"
-                : "text-gray-600 hover:text-green-600"
-            }`}
-          >
-            Consultant Login
-          </button>
+        <div className="flex bg-gray-50">
+          {["login", "signup", "consultantLogin"].map((mode) => (
+            <button
+              key={mode}
+              onClick={() => switchAuthMode(mode)}
+              className={`flex-1 py-3 px-4 text-sm font-semibold transition-all duration-300 ${
+                authMode === mode
+                  ? "bg-white text-green-600 border-b-2 border-green-600"
+                  : "text-gray-600 hover:text-green-600"
+              }`}
+            >
+              {mode === "login"
+                ? "User Login"
+                : mode === "signup"
+                ? "Sign Up"
+                : "Consultant Login"}
+            </button>
+          ))}
         </div>
 
         {/* Form */}
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name - Only for Signup */}
             {authMode === "signup" && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your full name"
-                  required
-                />
-              </div>
-            )}
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
+              <Input
+                label="Full Name"
+                name="name"
+                value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                placeholder="Enter your email"
-                required
+                placeholder="Enter your full name"
               />
-            </div>
-            {/* phonenumber */}
-            {authMode === "signup" && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="phone number"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your phone number"
-                  required
-                />
-              </div>
             )}
-
-            {/* Password */}
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Enter your email"
+            />
+            {authMode === "signup" && (
+              <Input
+                label="Phone Number"
+                name="phoneNumber"
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                placeholder="Enter your phone number"
+              />
+            )}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-semibold mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   placeholder="Enter your password"
                   required
                 />
                 <button
                   type="button"
+                  className="absolute right-3 top-3"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
-                  {showPassword ? (
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
-
-            {/* Confirm Password - Only for Signup */}
             {authMode === "signup" && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Confirm your password"
-                  required
-                />
-              </div>
+              <Input
+                label="Confirm Password"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm your password"
+              />
             )}
-
-            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md"
             >
-              {authMode === "login" || authMode === "consultantLogin" ? "Sign In" : "Create Account" }
-              
+              {loading
+                ? "Processing..."
+                : authMode === "login" || authMode === "consultantLogin"
+                ? "Sign In"
+                : "Create Account"}
             </button>
           </form>
 
-          {/* Forgot Password - Only for Login */}
+          {/* Bottom Section */}
           {authMode === "login" && (
-            <div className="mt-4 text-center">
-              <a
-                href="#"
-                className="text-sm text-green-600 hover:text-green-700 hover:underline"
+            <div className="mt-4 text-center text-sm">
+              <span className="text-gray-600">Don’t have an account?</span>{" "}
+              <button
+                onClick={() => switchAuthMode("signup")}
+                className="text-green-600 font-medium hover:underline"
               >
-                Forgot your password?
-              </a>
-            </div>
-          )}
-
-          {/* Terms and Conditions - Only for Signup */}
-          {authMode === "signup" && (
-            <div className="mt-4 text-center">
-              <p className="text-xs text-gray-600">
-                By creating an account, you agree to our{" "}
-                <a href="#" className="text-green-600 hover:underline">
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a href="#" className="text-green-600 hover:underline">
-                  Privacy Policy
-                </a>
-              </p>
+                Sign Up
+              </button>
             </div>
           )}
         </div>
@@ -366,5 +234,21 @@ const LoginSignupModal = () => {
     </div>
   );
 };
+
+// ✅ Reusable input component
+const Input = ({ label, name, value, onChange, type = "text", placeholder }) => (
+  <div>
+    <label className="block text-sm font-semibold mb-2">{label}</label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+      placeholder={placeholder}
+      required
+    />
+  </div>
+);
 
 export default LoginSignupModal;

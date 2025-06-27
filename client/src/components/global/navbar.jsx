@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "./logo";
-import ConsultantApplicationForm from "../../forms/consultantApplicationform";
+import ConsultantApplicationForm from "../../forms/ConsultantApplicationform";
 import LoginSignupModal from "../../forms/loginSignup";
 
 export default function Navbar() {
@@ -154,8 +154,9 @@ export default function Navbar() {
                       </span>
                     </button>
                  </Link>
+                   <Link to={'/consultantApplicationForm'}>
                     <button
-                      onClick={() => setShowConsultantForm(true)}
+                     
                       className=" bg-[#0d542b] overflow-hidden text-white px-7 py-3 rounded-full font-semibold  transform hover:scale-105 transition-all duration-300 hover:from-emerald-600 hover:to-green-600"
                     >
                       <span className="relative flex items-center space-x-2">
@@ -175,6 +176,7 @@ export default function Navbar() {
                         </svg>
                       </span>
                     </button>
+                   </Link>
                   </>
                 ) : (
                   <>
