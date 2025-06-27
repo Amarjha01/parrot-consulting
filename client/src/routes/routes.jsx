@@ -66,6 +66,7 @@ const routes = createBrowserRouter([
       },
       { path: 'login&signup', element: <LoginSignupModal /> },
       { path: '/meeting/:bookingId', element: <MeetingRoom /> },
+      { path: '/', element: <MeetingRoom /> },
 
 ]);
 
