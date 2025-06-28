@@ -7,6 +7,7 @@ import { getBookingById } from "../service/bookingApi";
 //   withCredentials: true,
 // });
 const socket = io(import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com/api/v1", {
+  transports: ["websocket"],
   withCredentials: true,
 });
 
