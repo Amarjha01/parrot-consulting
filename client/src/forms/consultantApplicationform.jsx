@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { registerAsConsultant } from "../service/consultantApi.js";
-
+import { motion } from "framer-motion";
+import {
+  User,
+  Mail,
+  Phone,
+  File,
+  UploadCloud,
+  Clock,
+} from "lucide-react"; // Use only icons where needed
 export default function ConsultantApplicationForm() {
   const [formData, setFormData] = useState({
     name: "",
@@ -274,9 +282,9 @@ export default function ConsultantApplicationForm() {
         submissionData.append("certificates", file);
       });
 
-      for (let [key, value] of submissionData.entries()) {
-        console.log(key, value instanceof File ? `File: ${value.name}` : value);
-      }
+      // for (let [key, value] of submissionData.entries()) {
+      //   console.log(key, value instanceof File ? `File: ${value.name}` : value);
+      // }
 
       const response = await registerAsConsultant(submissionData);
       console.log("API Response:", response);
@@ -333,38 +341,50 @@ export default function ConsultantApplicationForm() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-center items-center mb-8">
-        <div className="w-8 h-8 bg-green-500 rounded-full mr-2"></div>
-        <h1 className="text-2xl font-bold uppercase">Parrot Consult</h1>
-      </div>
+    <div className="bg-[#103530] min-h-screen py-10 px-4">
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, ease: "easeOut" }}
+    className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-xl"
+  >
+    {/* Header */}
+    <div className="flex justify-center items-center mb-8">
+      <div className="w-8 h-8 bg-[#3d8e5f] rounded-full mr-2"></div>
+      <h1 className="text-2xl font-bold uppercase text-[#18664d]">
+        Parrot Consult
+      </h1>
+    </div>
 
-      <h2 className="text-4xl font-bold text-center mb-8">
-        Become a Consultant
-      </h2>
+    <h2 className="text-4xl font-bold text-center mb-8 text-[#103530]">
+      Become a Consultant
+    </h2>
 
       <div className="space-y-8">
         {/* Basic Details */}
         <div>
           <h3 className="text-xl font-bold mb-4">Basic Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                className="w-full border rounded p-2"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+        <div className="relative">
+  <User className="absolute left-3 top-3 text-[#3d8e5f]" size={18} />
+  <input
+    type="text"
+    name="name"
+    placeholder="Full Name"
+    className="pl-10 w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f]"
+    value={formData.name}
+    onChange={handleInputChange}
+    required
+  />
+</div>
+
             <div>
               <input
                 type="email"
                 name="email"
                 placeholder="Email Address"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.email}
                 onChange={handleInputChange}
                 required
@@ -375,7 +395,8 @@ export default function ConsultantApplicationForm() {
                 type="tel"
                 name="phoneNumber"
                 placeholder="Phone Number"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 required
@@ -386,7 +407,8 @@ export default function ConsultantApplicationForm() {
                 type="password"
                 name="password"
                 placeholder="Password"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.password}
                 onChange={handleInputChange}
                 required
@@ -396,7 +418,8 @@ export default function ConsultantApplicationForm() {
               <textarea
                 name="address"
                 placeholder="Complete Address"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 rows={3}
                 value={formData.address}
                 onChange={handleInputChange}
@@ -405,8 +428,9 @@ export default function ConsultantApplicationForm() {
             </div>
           </div>
           <div className="mt-4">
-            <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer">
-              <span className="mr-2">📷 Upload Profile Picture *</span>
+            <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer hover:bg-[#3d8e5f]/10 transition duration-200"
+>
+              <span className="mr-2">📷 Upload Profile Picture <span className=" text-red-800">*</span></span>
               <input
                 type="file"
                 name="profilePicture"
@@ -432,7 +456,8 @@ export default function ConsultantApplicationForm() {
               <input
                 type="number"
                 placeholder="Years of Experience"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 name="experience"
                 value={formData.experience}
                 onChange={handleInputChange}
@@ -441,8 +466,9 @@ export default function ConsultantApplicationForm() {
               />
             </div>
             <div>
-              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
-                <span className="mr-2">📄 Upload CV / Resume *</span>
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer hover:bg-[#3d8e5f]/10 transition duration-200"
+>
+                <span className="mr-2">📄 Upload CV / Resume <span className=" text-red-800">*</span></span>
                 <input
                   type="file"
                   name="resume"
@@ -468,7 +494,8 @@ export default function ConsultantApplicationForm() {
             <div>
               <select
                 name="primaryCategory"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.primaryCategory}
                 onChange={handleInputChange}
                 required
@@ -487,7 +514,8 @@ export default function ConsultantApplicationForm() {
                 type="text"
                 name="specializedServices"
                 placeholder="Specialized Services (comma separated)"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.specializedServices}
                 onChange={handleInputChange}
                 required
@@ -506,7 +534,8 @@ export default function ConsultantApplicationForm() {
             >
               <div>
                 <select
-                  className="w-full border rounded p-2"
+                  className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                   value={field.qualification}
                   onChange={(e) =>
                     handleEducationChange(
@@ -528,7 +557,8 @@ export default function ConsultantApplicationForm() {
                 <input
                   type="text"
                   placeholder="University / Institution Name"
-                  className="w-full border rounded p-2"
+                  className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                   value={field.university}
                   onChange={(e) =>
                     handleEducationChange(index, "university", e.target.value)
@@ -537,7 +567,8 @@ export default function ConsultantApplicationForm() {
               </div>
               <div>
                 <select
-                  className="w-full border rounded p-2"
+                  className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                   value={field.fieldOfStudy}
                   onChange={(e) =>
                     handleEducationChange(index, "fieldOfStudy", e.target.value)
@@ -558,7 +589,8 @@ export default function ConsultantApplicationForm() {
                 <input
                   type="text"
                   placeholder="Graduation Year"
-                  className="w-full border rounded p-2"
+                  className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                   value={field.graduationYear}
                   onChange={(e) =>
                     handleEducationChange(
@@ -589,14 +621,16 @@ export default function ConsultantApplicationForm() {
                 type="text"
                 name="keySkills"
                 placeholder="Key Skills (comma separated)"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.keySkills}
                 onChange={handleInputChange}
                 required
               />
             </div>
             <div>
-              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer hover:bg-[#3d8e5f]/10 transition duration-200"
+>
                 <span className="mr-2">
                   📄 Upload Certificates (Multiple files allowed)
                 </span>
@@ -618,7 +652,8 @@ export default function ConsultantApplicationForm() {
             <div>
               <select
                 name="languageProficiency"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.languageProficiency}
                 onChange={(e) => {
                   const options = e.target.options;
@@ -719,69 +754,20 @@ export default function ConsultantApplicationForm() {
           <h3 className="text-xl font-bold mb-4">Availability & Pricing</h3>
           <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             <div>
-              {/* <div className="flex items-center">
-                <label className="w-full">
-                  <span className="block mb-2">
-                    Availability Hours per Week
-                  </span>
-                  <input
-                    type="range"
-                    name="availabilityPerWeek"
-                    min="1"
-                    max="40"
-                    value={formData.availabilityPerWeek}
-                    onChange={handleInputChange}
-                    className="w-full"
-                  />
-                  <div className="text-center">
-                    {formData.availabilityPerWeek} hours
-                  </div>
-                </label>
-              </div> */}
             </div>
             <div>
               <input
                 type="number"
                 name="hourlyRate"
                 placeholder="Hourly Rate (₹)"
-                className="w-full border rounded p-2"
+                className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#3d8e5f] hover:border-[#18664d] transition duration-200"
+
                 value={formData.hourlyRate}
                 onChange={handleInputChange}
                 required
                 min="0"
               />
             </div>
-            {/* <div>
-              <select
-                name="preferredWorkingHours"
-                className="w-full border rounded p-2"
-                value={formData.preferredWorkingHours}
-                onChange={handleInputChange}
-              >
-                <option value="">Preferred Working Hours</option>
-                <option value="morning">Morning (6AM - 12PM)</option>
-                <option value="afternoon">Afternoon (12PM - 6PM)</option>
-                <option value="evening">Evening (6PM - 12AM)</option>
-                <option value="night">Night (12AM - 6AM)</option>
-                <option value="flexible">Flexible</option>
-              </select>
-            </div> */}
-            {/* <div>
-              <select
-                name="bookingLeadTime"
-                className="w-full border rounded p-2"
-                value={formData.bookingLeadTime}
-                onChange={handleInputChange}
-              >
-                <option value="">Booking Lead Time</option>
-                <option value="1">1 day</option>
-                <option value="2">2 days</option>
-                <option value="3">3 days</option>
-                <option value="5">5 days</option>
-                <option value="7">1 week</option>
-                <option value="14">2 weeks</option>
-              </select>
-            </div> */}
           </div>
         </div>
 
@@ -792,8 +778,9 @@ export default function ConsultantApplicationForm() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
-                <span className="mr-2">📄 Upload Aadhaar Card *</span>
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer hover:bg-[#3d8e5f]/10 transition duration-200"
+>
+                <span className="mr-2">📄 Upload Aadhaar Card <span className="text-red-800">*</span></span>
                 <input
                   type="file"
                   name="aadhaarCard"
@@ -810,8 +797,9 @@ export default function ConsultantApplicationForm() {
               )}
             </div>
             <div>
-              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
-                <span className="mr-2">📄 Upload PAN Card *</span>
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer hover:bg-[#3d8e5f]/10 transition duration-200"
+>
+                <span className="mr-2">📄 Upload PAN Card <span className="text-red-800">*</span></span>
                 <input
                   type="file"
                   name="panCard"
@@ -828,7 +816,8 @@ export default function ConsultantApplicationForm() {
               )}
             </div>
             <div className="md:col-span-2">
-              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer w-full justify-center">
+              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm cursor-pointer hover:bg-[#3d8e5f]/10 transition duration-200"
+>
                 <span className="mr-2">📄 Upload Passport (Optional)</span>
                 <input
                   type="file"
@@ -905,6 +894,8 @@ export default function ConsultantApplicationForm() {
           </button>
         </div>
       </div>
+      </motion.div>
     </div>
+    
   );
 }

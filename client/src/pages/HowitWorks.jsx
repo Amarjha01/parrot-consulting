@@ -174,11 +174,11 @@ const steps = [
   <p className="text-xl sm:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
     Join thousands of professionals earning on their terms and helping businesses grow.
   </p>
- <Link to={'/consultantform'}>
-  <button className="bg-white text-emerald-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+<a href="/ConsultantSignupForm">
+<button className="bg-white text-emerald-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
     Join as a Consultant
   </button>
- </Link>
+</a>
 </div>
 
 

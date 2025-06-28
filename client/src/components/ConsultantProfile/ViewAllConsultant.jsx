@@ -408,7 +408,7 @@ const ConsultantCard = ({ consultant, index, onBookNow }) => {
             {consultant.primaryCategory}
           </p>
           <p className="text-xs text-gray-500 mb-2">{consultant.email}</p>
-          <p className="text-xs text-gray-500 mb-2">{consultant.phoneNumber}</p>
+          <p className="text-xs text-gray-500 mb-2">*******{consultant.phoneNumber.toString().slice(-3)}</p>
           <p className="text-xs text-gray-500 mb-2">{consultant.address}</p>
 
           {/* Rating */}

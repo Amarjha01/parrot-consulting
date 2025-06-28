@@ -18,16 +18,30 @@ export default function MeetExperts({ consultants, onViewProfile }) {
     
       <div className="px-4 overflow-hidden relative">
         <Link to={'/ViewAllConsultants'}>
-         <div className=" absolute right-5 group cursor-pointer px-3 py-1.5 md:px-6 md:py-3 rounded-xl bg-amber-200 hover:bg-amber-300 shadow-lg hover:shadow-amber-400/50 transform hover:scale-105 transition-all duration-300 border-2 border-amber-300 hover:border-amber-400  overflow-hidden">
-          <div className="flex items-center gap-2 relative z-10">
-            <Eye className="w-4 h-4 text-amber-800" />
-            <span className="font-bold text-amber-800 tracking-wide text-sm uppercase">
-              VIEW ALL
-            </span>
-            <ArrowRight className="w-4 h-4 text-amber-800 group-hover:translate-x-1 transition-transform duration-200" />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12"></div>
-        </div>
+      <div
+  className="absolute right-5 group cursor-pointer px-3 py-1.5 md:px-6 md:py-3 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 overflow-hidden"
+  style={{
+    backgroundColor: '#2c7951',
+    borderColor: '#1c7259',
+  }}
+>
+  <div className="flex items-center gap-2 relative z-10">
+    <Eye className="w-4 h-4 text-white"  />
+    <span
+      className="font-bold tracking-wide text-sm uppercase text-white"
+      
+    >
+      VIEW ALL
+    </span>
+    <ArrowRight
+      className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200 text-white"
+      
+    />
+  </div>
+
+  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12"></div>
+</div>
+
         </Link>
     
         <h2 className="text-xl font-bold md:text-3xl mb-12">

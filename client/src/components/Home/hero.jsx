@@ -28,6 +28,7 @@ export default function Hero() {
             
             {/* Search Input - Fully responsive */}
             <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto lg:mx-0">
+               <a href="/ViewAllConsultants">
               <input
                 type="text"
                 placeholder="What can we assist you with?"
@@ -35,9 +36,11 @@ export default function Hero() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent shadow-sm"
               />
-              <button className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 bg-green-800 text-white p-1.5 sm:p-2 rounded-full hover:bg-green-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+           
+                <button className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 bg-green-800 text-white p-1.5 sm:p-2 rounded-full hover:bg-green-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                 <Search size={16} className="sm:w-5 sm:h-5" />
               </button>
+            </a>
             </div>
           </div>
 

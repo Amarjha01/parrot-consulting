@@ -15,12 +15,14 @@ import AboutUsPage from '../pages/AboutUs';
 import ConsultantForm from '../components/global/ConsultantForm';
 import ConsultantDetailView from '../components/ConsultantProfile/consultantDetailView';
 import ConsultantProfile from '../pages/ConsultantProfile';
-import ConsultantApplicationForm from '../forms/consultantApplicationform';
 import ViewAllConsultants from '../components/ConsultantProfile/ViewAllConsultant';
 import AdminDashboard from '../pages/AdminDashboard';
 import ConsultantDashboard from '../pages/ConsultantDashboard';
 import LoginSignupModal from '../forms/loginSignup';
 import MeetingRoom from '../videoroom/meeting';
+import ConsultantApplicationForm from '../forms/ConsultantApplicationform';
+import ConsultantSignupForm from '../forms/ConsultantSignupForm';
+import AuthModal from '../forms/AuthModal';
 
 const routes = createBrowserRouter([
   {
@@ -37,6 +39,7 @@ const routes = createBrowserRouter([
       { path: 'consultant/profile', element: <ConsultantProfile /> },
       { path: 'application-form', element: <ConsultantApplicationForm /> },
       { path: 'ViewAllConsultants', element: <ViewAllConsultants /> },
+      { path: 'AuthModal', element: <AuthModal /> },
     ]
   },
   {
@@ -64,8 +67,10 @@ const routes = createBrowserRouter([
           </ProtectedRoute>
         )
       },
-      { path: 'login', element: <LoginSignupModal /> },
+      { path: 'login&signup', element: <LoginSignupModal /> },
       { path: '/meeting/:bookingId', element: <MeetingRoom /> },
+      { path: '/consultantApplicationForm', element: <ConsultantApplicationForm /> },
+      { path: '/ConsultantSignupForm', element: <ConsultantSignupForm /> },
 
 ]);
 

@@ -10,7 +10,6 @@ ConsultantRouter.route("/registerasconsultant").post(
     { name: "resume", maxCount: 1 },
     { name: "aadhaarCard", maxCount: 1 },
     { name: "panCard", maxCount: 1 },
-    { name: "passport", maxCount: 1 },
     { name: "certificates", maxCount: 8 },
   ]),
   ApplyAsconsultant
