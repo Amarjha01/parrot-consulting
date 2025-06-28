@@ -91,6 +91,7 @@ export default function ConsultantDetailView({}) {
         </button>
       </div>
 
+
       {/* Name & Title */}
       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mt-4 md:mt-0">
         {name}
@@ -107,7 +108,7 @@ export default function ConsultantDetailView({}) {
         </div>
         <div className="flex items-center gap-2 justify-center md:justify-start">
           <Phone className="w-5 h-5 text-teal-600" />
-          <span className="text-gray-600">{phoneNumber}</span>
+          <span className="text-gray-600">*******{phoneNumber.toString().slice(-3)}</span>
         </div>
         <div className="flex items-center gap-2 justify-center md:justify-start">
           <MapPin className="w-5 h-5 text-teal-600" />
@@ -123,15 +124,9 @@ export default function ConsultantDetailView({}) {
       <div className="flex flex-wrap justify-center md:justify-start gap-4">
         <div className="bg-white px-4 py-2 rounded-lg shadow text-center w-28">
           <div className="text-xl sm:text-2xl font-bold text-teal-800">
-            ₹{hourlyRate}
+            ₹{hourlyRate || "4"}
           </div>
           <div className="text-sm text-gray-600">per hour</div>
-        </div>
-        <div className="bg-white px-4 py-2 rounded-lg shadow text-center w-28">
-          <div className="text-xl sm:text-2xl font-bold text-teal-800">
-            {availabilityPerWeek}h
-          </div>
-          <div className="text-sm text-gray-600">per week</div>
         </div>
         <div className="bg-white px-4 py-2 rounded-lg shadow text-center w-28">
           <div className="text-xl sm:text-2xl font-bold text-teal-800">4.8</div>
@@ -208,15 +203,15 @@ export default function ConsultantDetailView({}) {
             <div className="space-y-2 text-gray-600">
               <p>
                 <span className="font-semibold">Working Hours:</span>{" "}
-                {preferredWorkingHours}
+                {preferredWorkingHours || "09:30 - 05:00"}
               </p>
               <p>
                 <span className="font-semibold">Lead Time:</span>{" "}
-                {bookingLeadTime}
+                {bookingLeadTime || "2 day"}
               </p>
               <p>
                 <span className="font-semibold">Hours/Week:</span>{" "}
-                {availabilityPerWeek} hours
+                {availabilityPerWeek || "10"} hours
               </p>
             </div>
           </div>

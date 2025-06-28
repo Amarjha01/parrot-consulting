@@ -3,6 +3,21 @@ import { useParams, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { getBookingById } from "../service/bookingApi";
 
+
+//local host
+// const socket = io(
+//   import.meta.env.VITE_API_BASE_URL || "http://localhost:8010",
+//   {
+//     withCredentials: true,
+//   }
+// );
+
+//production
+const socket = io(
+  import.meta.env.VITE_SOCKET_URL || "http://localhost:8010/api/v1",
+  {
+    withCredentials: true,
+
 // const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:8010", {
 //   withCredentials: true,
 // });
@@ -33,6 +48,7 @@ const cleanupWebRTC = ({ peerConnection, localStream, localVideo, remoteVideo })
 
   if (localVideo.current) {
     localVideo.current.srcObject = null;
+
   }
 
   hasPlayedRemote = false;
