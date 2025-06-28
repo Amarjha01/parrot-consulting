@@ -3,7 +3,9 @@ import { registerAsUser, loginAsUser } from "../service/userApi";
 import { loginAsConsultant } from "../service/consultantApi";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Home } from 'lucide-react';
-
+import { showSuccessToast } from "../util/Notification";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const LoginSignupModal = () => {
   const navigate = useNavigate();
   const [authMode, setAuthMode] = useState("login");
@@ -71,9 +73,12 @@ const LoginSignupModal = () => {
           localStorage.setItem(role, JSON.stringify(userData));
         }
 
-        alert("Login successful!");
+       
+        showSuccessToast("Login successful! , redirecting to home page")
         resetForm();
-        navigate("/");
+       setTimeout(() => {
+         navigate("/");
+       }, 1000);
       }
     } catch (err) {
       console.error(err);
@@ -85,6 +90,18 @@ const LoginSignupModal = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center  px-4">
+          <ToastContainer
+  position="top-right"
+  autoClose={4000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick
+  rtl={false}
+  pauseOnFocusLoss
+  draggable
+  pauseOnHover
+  
+/>
       <Link to="/" className="absolute top-5 left-5 flex items-center gap-1 text-green-700 hover:text-green-900">
         <Home size={20} /> <span className="font-semibold uppercase">Home</span>
       </Link>
@@ -132,7 +149,7 @@ const LoginSignupModal = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {authMode === "signup" && (
               <Input
-                label="Full Name"
+                
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
@@ -140,7 +157,7 @@ const LoginSignupModal = () => {
               />
             )}
             <Input
-              label="Email"
+             
               name="email"
               type="email"
               value={formData.email}
@@ -149,7 +166,7 @@ const LoginSignupModal = () => {
             />
             {authMode === "signup" && (
               <Input
-                label="Phone Number"
+               
                 name="phoneNumber"
                 type="tel"
                 value={formData.phoneNumber}
@@ -158,7 +175,7 @@ const LoginSignupModal = () => {
               />
             )}
             <div>
-              <label className="block text-sm font-semibold mb-2">Password</label>
+            
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -180,7 +197,7 @@ const LoginSignupModal = () => {
             </div>
             {authMode === "signup" && (
               <Input
-                label="Confirm Password"
+                
                 name="confirmPassword"
                 type="password"
                 value={formData.confirmPassword}

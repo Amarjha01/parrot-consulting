@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs"; // file system of node js
+import path from "path";
 
   // Configuration
   cloudinary.config({
@@ -8,22 +9,20 @@ import fs from "fs"; // file system of node js
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath, resourceType = "raw") => {
   try {
-    if (!localFilePath) {
-      return null;
-    }
-    const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto",
+    if (!localFilePath) return null;
+
+    const absolutePath = path.resolve(localFilePath); // <-- Fix for relative path
+    const response = await cloudinary.uploader.upload(absolutePath, {
+      resource_type: resourceType,
     });
-    // file has been uploaded on cloudinary
-    fs.unlinkSync(localFilePath);
+
+    // Clean up local file
+    fs.unlinkSync(absolutePath);
     return response;
   } catch (error) {
-    if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
-    }
-    //remove the locally saved temp file as upload got failed
+    console.error("Cloudinary Upload Error:", error);
     return null;
   }
 };

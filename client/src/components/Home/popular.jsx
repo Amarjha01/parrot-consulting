@@ -15,17 +15,17 @@ export default function PopularCategories() {
     {
       icon: <Monitor className="w-18 h-18 text-green-800" />,
       title: "IT Consulting",
-      description: "Get supp't guidence on your Echnology needs",
+      description: "Get your personalized IT needs from experts via Parrot Consult.",
     },
     {
       icon: <ShoppingCart className="w-18 h-18 text-green-800" />,
       title: "Ecommerce Consulting",
-      description: "Spice ts pootible business for grobath",
+      description: "E-Commerce: E-commerce consulting made easier and convenient via Parrot Consult.",
     },
     {
       icon: <Scale className="w-18 h-18 text-green-800" />,
       title: "Legal Consulting",
-      description: "Nanagarimes challeng's with canfobbus",
+      description: "Legal compliances made easier and hassle free via Parrot Consult.",
     },
   ];
 
@@ -44,7 +44,7 @@ export default function PopularCategories() {
             >
               <div className="flex justify-center mb-4">{category.icon}</div>
               <h3 className="text-lg font-bold mb-2">{category.title}</h3>
-              <p className="text-gray-600 text-sm">{category.description}</p>
+              <p className="text-gray-600 text-sm px-5">{category.description}</p>
             </div>
            </Link>
           ))}

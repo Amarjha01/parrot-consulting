@@ -66,35 +66,21 @@ const consultantSchema = new mongoose.Schema(
     // Availability & Pricing
     // Availability & Pricing
     hourlyRate: Number,
-    bookingLeadTime: String,
+    // bookingLeadTime: String,
 
-    weeklyAvailability: [
-      {
-        day: {
-          type: String,
-          enum: [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ],
-          required: true,
-        },
-        isActive: {
-          type: Boolean,
-          default: false,
-        },
-        timeSlots: [
-          {
-            start: { type: String, required: true }, // "09:00"
-            end: { type: String, required: true }, // "12:00"
-          },
-        ],
-      },
-    ],
+weeklyAvailability: {
+  type: Map,
+  of: [
+    {
+      start: { type: String },
+      end: { type: String },
+    }
+  ],
+  default: {},
+},
+
+
+
 
     // Agreements
     acceptedTerms: { type: Boolean, default: false },
@@ -120,10 +106,6 @@ const consultantSchema = new mongoose.Schema(
       panCard: {
         type: String,
         required: false, // Cloudinary URL or path
-      },
-      passport: {
-        type: String, // Optional
-        required: false,
       },
     },
 

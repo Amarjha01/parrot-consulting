@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 import { 
   User, 
   Mail, 
@@ -22,13 +23,20 @@ import {
 Award,
 Languages,
  Clock,
-  Plus
+  Plus,
+    CreditCard,
+    Loader2
 } from 'lucide-react';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { showErrorToast, showSuccessToast } from '../util/Notification';
 const ConsultantSignupForm = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [resumeFile, setResumeFile] = useState(null);
   const [certificateFile, setCertificateFile] = useState(null);
+const [aadhaarFile, setAadhaarFile] = useState(null);
+const [panFile, setPanFile] = useState(null);
+ const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState({
   monday: { enabled: false, timeSlots: [] },
   tuesday: { enabled: false, timeSlots: [] },
@@ -38,14 +46,14 @@ const ConsultantSignupForm = () => {
   saturday: { enabled: false, timeSlots: [] },
   sunday: { enabled: false, timeSlots: [] }
 });
-
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    watch
+    watch,
+    reset
   } = useForm();
 
   const consultingCategories = [
@@ -121,10 +129,86 @@ const updateTimeSlot = (day, index, field, value) => {
     }
   }));
 };
-  const onSubmit = (data) => {
-    console.log('Form submitted:', data);
-    // Handle form submission here
-  };
+
+
+
+const onSubmit = async (data) => {
+  setIsLoading(true);
+  console.log(data);
+
+  const formData = new FormData();
+
+  // ✅ Append file fields
+  formData.append("profilePicture", data.profilePicture[0]);
+  formData.append("resume", data.resume[0]);
+  formData.append("panCard", data.panCard[0]);
+  formData.append("aadhaarCard", data.aadhaarCard[0]);
+  formData.append("certificates", data.certificates[0]); // Combined PDF
+
+  // ✅ Append simple text/number fields
+  const simpleFields = [
+    "fullName", "email", "password", "phone", "address", "experience",
+    "fieldOfStudy", "highestQualification", "graduationYear",
+    "hourlyRate", "category", "universityName"
+  ];
+
+  simpleFields.forEach((field) => {
+    formData.append(field, data[field]);
+  });
+
+  // ✅ Boolean fields
+  formData.append("termsAccepted", data.termsAccepted === "true" || data.termsAccepted === true);
+  formData.append("profileVisibility", data.profileVisibility === "true" || data.profileVisibility === true);
+
+  // ✅ Append array fields as JSON strings
+  formData.append("languages", JSON.stringify(data.languages));
+  formData.append("specializedServices", JSON.stringify(data.specializedServices?.split(',') || []));
+  formData.append("skills", JSON.stringify(data.skills?.split(',') || []));
+
+  // ✅ Append old format day-wise availability (optional, backward compatibility)
+  if (typeof data.availability === "object") {
+    Object.entries(data.availability).forEach(([day, obj]) => {
+      formData.append(`availability[${day}]`, obj.enabled);
+      obj.timeSlots?.forEach((slot, index) => {
+        formData.append(`timeSlots[${day}][${index}][start]`, slot.start);
+        formData.append(`timeSlots[${day}][${index}][end]`, slot.end);
+      });
+    });
+  }
+
+  // ✅ Append modern timeSlots as full JSON
+  if (typeof data.timeSlots === "object") {
+    formData.append("timeSlots", JSON.stringify(data.timeSlots));
+  }
+
+  try {
+    const res = await axios.post(
+      "https://api.parrotconsult.com/api/v1/consultant/registerasconsultant",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("✅ Form submitted successfully:", res.data);
+
+    setIsLoading(false);
+    showSuccessToast("Form submitted successfully")
+    reset(); // Clear the form
+    setTimeout(() => {
+    window.location.href = "/login&signup";
+    }, 1000);
+  } catch (error) {
+    console.error("❌ Form submission error:", error.response?.data || error.message);
+    showErrorToast("Form submission, please contact us")
+    setIsLoading(false);
+  }
+};
+
+
+
 const validateAvailability = () => {
   const hasAvailability = Object.values(availability).some(day => 
     day.enabled && day.timeSlots.length > 0
@@ -146,6 +230,22 @@ const validateAvailability = () => {
       setValue('resume', file);
     }
   };
+  const handlePanUpload = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setPanFile(file.name);
+    setValue('panCard', file);
+  }
+};
+
+const handleAadhaarUpload = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setAadhaarFile(file.name);
+    setValue('aadhaarCard', file);
+  }
+};
+
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -165,7 +265,20 @@ const validateAvailability = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0e5f44] via-[#143d35] to-[#26794f] p-4">
+   <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+           <ToastContainer
+  position="top-right"
+  autoClose={4000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick
+  rtl={false}
+  pauseOnFocusLoss
+  draggable
+  pauseOnHover
+  
+/>
+ <div className="min-h-screen bg-gradient-to-br from-[#0e5f44] via-[#143d35] to-[#26794f] p-4">
       <motion.div
         className="max-w-4xl mx-auto"
         variants={containerVariants}
@@ -339,7 +452,7 @@ const validateAvailability = () => {
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}
-                      className="hidden"
+                      className=""
                       id="profile-upload"
                       {...register('profilePicture', { required: 'Profile picture is required' })}
                     />
@@ -673,7 +786,7 @@ const validateAvailability = () => {
               setValue('certificates', file);
             }
           }}
-          className="hidden"
+          className=""
           id="certificates-upload"
           {...register('certificates', { required: 'Certificates upload is required' })}
         />
@@ -708,92 +821,97 @@ const validateAvailability = () => {
   </h3>
   
   <div className="space-y-4">
-    {weekDays.map((day) => (
-      <div key={day} className="border-2 border-gray-200 rounded-lg p-4">
-        {/* Day Checkbox */}
-        <div className="flex items-center gap-3 mb-4">
-          <input
-            type="checkbox"
-            id={`day-${day.toLowerCase()}`}
-            {...register(`availability.${day.toLowerCase()}.enabled`)}
-            onChange={(e) => {
-              if (!e.target.checked) {
-                // Clear time slots when day is unchecked
-                setAvailability(prev => ({
-                  ...prev,
-                  [day.toLowerCase()]: { enabled: false, timeSlots: [] }
-                }));
-              } else {
-                setAvailability(prev => ({
-                  ...prev,
-                  [day.toLowerCase()]: { enabled: true, timeSlots: [] }
-                }));
-              }
-            }}
-            className="w-5 h-5 text-[#26794f] focus:ring-[#26794f] rounded"
-          />
-          <label 
-            htmlFor={`day-${day.toLowerCase()}`}
-            className="text-lg font-semibold text-[#143d35] cursor-pointer"
-          >
-            {day}
-          </label>
-        </div>
+   {weekDays.map((day) => (
+  <div key={day} className="border-2 border-gray-200 rounded-lg p-4">
+    {/* Day Checkbox */}
+    <div className="flex items-center gap-3 mb-4">
+      <input
+        type="checkbox"
+        id={`day-${day.toLowerCase()}`}
+        {...register(`availability.${day.toLowerCase()}.enabled`)}
+        onChange={(e) => {
+          if (!e.target.checked) {
+            setAvailability((prev) => ({
+              ...prev,
+              [day.toLowerCase()]: { enabled: false, timeSlots: [] },
+            }));
+          } else {
+            setAvailability((prev) => ({
+              ...prev,
+              [day.toLowerCase()]: { enabled: true, timeSlots: [{ start: "", end: "" }] },
+            }));
+          }
+        }}
+        className="w-5 h-5 text-[#26794f] focus:ring-[#26794f] rounded"
+      />
+      <label
+        htmlFor={`day-${day.toLowerCase()}`}
+        className="text-lg font-semibold text-[#143d35] cursor-pointer"
+      >
+        {day}
+      </label>
+    </div>
 
-        {/* Time Slots - Only show if day is checked */}
-        {availability[day.toLowerCase()]?.enabled && (
-          <div className="ml-8 space-y-3">
-            {availability[day.toLowerCase()]?.timeSlots?.map((slot, index) => (
-              <div key={index} className="flex items-center gap-3 flex-wrap">
-                {/* Start Time */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="time"
-                    value={slot.start}
-                    onChange={(e) => updateTimeSlot(day.toLowerCase(), index, 'start', e.target.value)}
-                    className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-[#26794f] focus:outline-none"
-                  />
-                  <Clock size={18} className="text-[#26794f]" />
-                </div>
+    {/* Time Slots */}
+    {availability[day.toLowerCase()]?.enabled && (
+      <div className="ml-8 space-y-3">
+        {availability[day.toLowerCase()].timeSlots.map((slot, index) => (
+          <div key={index} className="flex items-center gap-3 flex-wrap">
+            {/* Start Time */}
+            <div className="flex items-center gap-2">
+              <input
+                type="time"
+                {...register(`timeSlots.${day}.${index}.start`)}
+                value={slot.start}
+                onChange={(e) =>
+                  updateTimeSlot(day.toLowerCase(), index, "start", e.target.value)
+                }
+                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-[#26794f] focus:outline-none"
+              />
+              <Clock size={18} className="text-[#26794f]" />
+            </div>
 
-                {/* To */}
-                <span className="text-gray-500 font-medium">to</span>
+            <span className="text-gray-500 font-medium">to</span>
 
-                {/* End Time */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="time"
-                    value={slot.end}
-                    onChange={(e) => updateTimeSlot(day.toLowerCase(), index, 'end', e.target.value)}
-                    className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-[#26794f] focus:outline-none"
-                  />
-                  <Clock size={18} className="text-[#26794f]" />
-                </div>
+            {/* End Time */}
+            <div className="flex items-center gap-2">
+              <input
+                type="time"
+                {...register(`timeSlots.${day}.${index}.end`)}
+                value={slot.end}
+                onChange={(e) =>
+                  updateTimeSlot(day.toLowerCase(), index, "end", e.target.value)
+                }
+                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-[#26794f] focus:outline-none"
+              />
+              <Clock size={18} className="text-[#26794f]" />
+            </div>
 
-                {/* Remove Button */}
-                <button
-                  type="button"
-                  onClick={() => removeTimeSlot(day.toLowerCase(), index)}
-                  className="text-red-500 hover:text-red-700 font-medium text-sm transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-
-            {/* Add Time Slot Button */}
+            {/* Remove */}
             <button
               type="button"
-              onClick={() => addTimeSlot(day.toLowerCase())}
-              className="text-[#26794f] hover:text-[#0e5f44] font-medium text-sm flex items-center gap-1 transition-colors"
+              onClick={() => removeTimeSlot(day.toLowerCase(), index)}
+              className="text-red-500 hover:text-red-700 font-medium text-sm transition-colors"
             >
-              <Plus size={16} />
-              Add time slot
+              Remove
             </button>
           </div>
-        )}
+        ))}
+
+        {/* Add Time Slot Button */}
+        <button
+          type="button"
+          onClick={() => addTimeSlot(day.toLowerCase())}
+          className="text-[#26794f] hover:text-[#0e5f44] font-medium text-sm flex items-center gap-1 transition-colors"
+        >
+          <Plus size={16} />
+          Add time slot
+        </button>
       </div>
-    ))}
+    )}
+  </div>
+))}
+
   </div>
 
   {/* Validation Message */}
@@ -817,7 +935,7 @@ const validateAvailability = () => {
                       type="file"
                       accept=".pdf,.doc,.docx"
                       onChange={handleResumeUpload}
-                      className="hidden"
+                      className=""
                       id="resume-upload"
                       {...register('resume', { required: 'Resume is required' })}
                     />
@@ -840,7 +958,100 @@ const validateAvailability = () => {
                 )}
               </div>
             </motion.div>
+{/* Document Verification Section */}
+<motion.div variants={itemVariants}>
+  <h3 className="text-2xl font-bold text-[#143d35] mb-6 border-b-2 border-[#26794f] pb-2">
+    Document Verification (Required)
+  </h3>
+  
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {/* Aadhaar Card Upload */}
+   <div className="space-y-2 mt-6">
+  <label className="flex items-center gap-2 text-[#143d35] font-medium">
+    <FileText size={18} />
+    Upload Aadhaar Card *
+  </label>
+  <div className="flex items-center gap-4">
+    <div className="flex-1">
+      <input
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        onChange={handleAadhaarUpload}
+        className=""
+        id="aadhaar-upload"
+        {...register('aadhaarCard', { required: 'Aadhaar card is required' })}
+      />
+      <label
+        htmlFor="aadhaar-upload"
+        className="w-full bg-gray-50 border-2 border-dashed border-[#26794f] rounded-lg p-4 text-center cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+      >
+        <Upload size={20} className="text-[#26794f]" />
+        <span className="text-[#143d35]">
+          {aadhaarFile ? aadhaarFile : 'Click to upload Aadhaar Card (PDF, JPG, PNG)'}
+        </span>
+      </label>
+    </div>
+  </div>
+  {errors.aadhaarCard && (
+    <p className="text-red-500 text-sm flex items-center gap-1">
+      <AlertCircle size={16} />
+      {errors.aadhaarCard.message}
+    </p>
+  )}
+</div>
 
+
+    {/* PAN Card Upload */}
+ <div className="space-y-2 mt-6">
+  <label className="flex items-center gap-2 text-[#143d35] font-medium">
+    <FileText size={18} />
+    Upload PAN Card *
+  </label>
+  <div className="flex items-center gap-4">
+    <div className="flex-1">
+      <input
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        onChange={handlePanUpload}
+        className=""
+        id="pan-upload"
+        {...register('panCard', { required: 'PAN card is required' })}
+      />
+      <label
+        htmlFor="pan-upload"
+        className="w-full bg-gray-50 border-2 border-dashed border-[#26794f] rounded-lg p-4 text-center cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+      >
+        <Upload size={20} className="text-[#26794f]" />
+        <span className="text-[#143d35]">
+          {panFile ? panFile : 'Click to upload PAN Card (PDF, JPG, PNG)'}
+        </span>
+      </label>
+    </div>
+  </div>
+  {errors.panCard && (
+    <p className="text-red-500 text-sm flex items-center gap-1">
+      <AlertCircle size={16} />
+      {errors.panCard.message}
+    </p>
+  )}
+</div>
+
+  </div>
+
+  {/* Important Note */}
+  <div className="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+    <div className="flex items-start gap-2">
+      <AlertCircle size={20} className="text-yellow-600 mt-0.5" />
+      <div>
+        <h4 className="font-semibold text-yellow-800">Important Note</h4>
+        <p className="text-yellow-700 text-sm mt-1">
+          Please ensure that your documents are clear, readable, and valid. 
+          These documents will be used for identity verification and compliance purposes.
+        </p>
+      </div>
+    </div>
+  </div>
+</motion.div>
             {/* Terms & Agreements */}
             <motion.div variants={itemVariants}>
               <h3 className="text-2xl font-bold text-[#143d35] mb-6 border-b-2 border-[#26794f] pb-2">
@@ -852,7 +1063,7 @@ const validateAvailability = () => {
                   <input
                     type="radio"
                     {...register('termsAccepted', { required: 'You must accept the terms and conditions' })}
-                    value="accepted"
+                    value="true"
                     className="w-4 h-4 mt-1 text-[#26794f] focus:ring-[#26794f]"
                   />
                   <label className="text-[#143d35]">
@@ -864,7 +1075,7 @@ const validateAvailability = () => {
                   <input
                     type="radio"
                     {...register('profileVisibility', { required: 'You must consent to profile visibility' })}
-                    value="visible"
+                    value="true"
                     className="w-4 h-4 mt-1 text-[#26794f] focus:ring-[#26794f]"
                   />
                   <label className="text-[#143d35]">
@@ -882,25 +1093,50 @@ const validateAvailability = () => {
             </motion.div>
 
             {/* Submit Button */}
-            <motion.div 
-              className="pt-6"
-              variants={itemVariants}
+           <motion.div
+      className="pt-6"
+      variants={itemVariants}
+    >
+      <motion.button
+        type="submit"
+        onClick={handleSubmit}
+        disabled={isLoading}
+        className={`
+          w-full py-4 px-8 rounded-lg font-semibold text-lg shadow-lg 
+          transition-all duration-300 flex items-center justify-center gap-2
+          ${isLoading 
+            ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed' 
+            : 'bg-gradient-to-r from-[#26794f] to-[#0e5f44] hover:shadow-xl'
+          } 
+          text-white
+        `}
+        whileHover={!isLoading ? { scale: 1.02 } : {}}
+        whileTap={!isLoading ? { scale: 0.98 } : {}}
+      >
+        {isLoading ? (
+          <>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             >
-              <motion.button
-                type="button"
-                onClick={handleSubmit(onSubmit)}
-                className="w-full bg-gradient-to-r from-[#26794f] to-[#0e5f44] text-white py-4 px-8 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <CheckCircle size={20} />
-                Become a Consultant
-              </motion.button>
+              <Loader2 size={20} />
             </motion.div>
+            <span>Processing...</span>
+          </>
+        ) : (
+          <>
+            <CheckCircle size={20} />
+            <span>Become a Consultant</span>
+          </>
+        )}
+      </motion.button>
+    </motion.div>
           </div>
         </motion.div>
       </motion.div>
     </div>
+
+   </form>
   );
 };
 

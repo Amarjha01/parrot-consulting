@@ -64,7 +64,7 @@ const Sidebar = ({ activeItem, setActiveItem, consultantData, onLogout }) => {
           <div className="w-6 h-6 bg-emerald-500 rounded-full"></div>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-900">PARROT</h1>
+          <a href="/"><h1 className="text-xl font-bold text-gray-900">PARROT</h1></a>
           <p className="text-sm text-gray-600">CONSULT</p>
         </div>
       </div>

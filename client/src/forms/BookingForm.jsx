@@ -8,6 +8,7 @@ import {
   createOrder,
   creatependingBooking,
 } from "../service/bookingApi";
+import AuthModal from "./AuthModal";
 
 const ConsultantBookingForm = ({ isOpen, onClose, preSelectedConsultant = null }) => {
   const [step, setStep] = useState(1);
@@ -16,10 +17,10 @@ const ConsultantBookingForm = ({ isOpen, onClose, preSelectedConsultant = null }
 const now = new Date();
 const [selectedDate, setSelectedDate] = useState(now);
 const [selectedTime, setSelectedTime] = useState(now);
-
-
+const [showAuthModal, setShowAuthModal] = useState(false);
+const [isBookingLoading, setIsBookingLoading] = useState(false);
   const [duration, setDuration] = useState(30);
-  const [projectDetails, setProjectDetails] = useState("Kindly enter the topic here....."); // Dummy value
+  const [projectDetails, setProjectDetails] = useState(""); // Dummy value
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(!preSelectedConsultant);
@@ -94,13 +95,16 @@ const [selectedTime, setSelectedTime] = useState(now);
     setStep(3);
   };
 
+
+
+  // ------------------------handle booking ----------------------------
  const handleBookingSubmit = async () => {
+  setIsBookingLoading(true);
   if (!projectDetails.trim()) {
     setError("Project details cannot be empty.");
+    setIsBookingLoading(false);
     return;
   }
-
- 
 
   try {
     const datetime = new Date(selectedDate);
@@ -114,7 +118,8 @@ const [selectedTime, setSelectedTime] = useState(now);
     const userEmail = user?.email;
 
     if (!user) {
-      window.open('/login&signup', '_blank');
+      setIsBookingLoading(false);
+   setShowAuthModal(true);
       return;
     }
 
@@ -137,16 +142,26 @@ const [selectedTime, setSelectedTime] = useState(now);
       order_id: razorpayOrder.data.id,
       name: "Snap Forge",
       description: "Consultation Booking",
-      handler: async function (response) {
-        await confirmBooking({
-          bookingId,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_signature: response.razorpay_signature,
-        });
-        setBookingComplete(true);
-        setStep(4);
-      },
+    handler: async function (response) {
+  try {
+    await confirmBooking({
+      bookingId,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_signature: response.razorpay_signature,
+    });
+
+    setBookingComplete(true);
+    setStep(4); // Optional: if you still want to show a success step
+
+    // ✅ Redirect to dashboard (or thank-you page)
+    window.location.href = "/userdashboard"; // Or use navigate("/dashboard") if using React Router
+  } catch (error) {
+    console.error("Booking confirmation failed", error);
+    setError("Payment succeeded but booking confirmation failed. Contact support.");
+  }
+}
+,
       prefill: {
         name: userName,
         email: userEmail,
@@ -158,6 +173,7 @@ const [selectedTime, setSelectedTime] = useState(now);
 
     const rzp = new window.Razorpay(options);
     rzp.open();
+
   } catch (err) {
     console.error("Booking/payment error:", err);
     setError("Something went wrong. Please try again.");
@@ -171,7 +187,7 @@ const [selectedTime, setSelectedTime] = useState(now);
     setSelectedDate(null);
     setSelectedTime(null);
     setDuration(30);
-    setProjectDetails("React App Debugging");
+    setProjectDetails("");
     setBookingComplete(false);
   };
 
@@ -205,16 +221,20 @@ const [selectedTime, setSelectedTime] = useState(now);
               value={projectDetails}
               onChange={(e) => setProjectDetails(e.target.value)}
               className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="e.g. React App Debugging"
+              placeholder="e.g. Kindly enter the topic here....."
             />
           </div>
 <button
   onClick={handleBookingSubmit}
   className="w-full bg-teal-600 text-white py-3 rounded hover:bg-teal-700 cursor-pointer"
 >
-  Confirm Booking & Pay ₹1
+   Pay ₹1 to confirm Booking
 </button>
 
+<AuthModal 
+  isOpen={showAuthModal} 
+  onClose={() => setShowAuthModal(false)} 
+/>
 
         </div>
       </div>
