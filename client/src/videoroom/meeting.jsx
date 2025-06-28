@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { getBookingById } from "../service/bookingApi";
 
+
 //local host
 // const socket = io(
 //   import.meta.env.VITE_API_BASE_URL || "http://localhost:8010",
@@ -16,8 +17,42 @@ const socket = io(
   import.meta.env.VITE_SOCKET_URL || "http://localhost:8010/api/v1",
   {
     withCredentials: true,
+
+// const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:8010", {
+//   withCredentials: true,
+// });
+const socket = io(import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com/api/v1", {
+  withCredentials: true,
+});
+
+
+
+let hasPlayedRemote = false;
+const cleanupWebRTC = ({ peerConnection, localStream, localVideo, remoteVideo }) => {
+  console.log("🧹 Cleaning up WebRTC");
+
+  if (peerConnection.current) {
+    peerConnection.current.close();
+    peerConnection.current = null;
   }
-);
+
+  if (localStream.current) {
+    localStream.current.getTracks().forEach((track) => track.stop());
+    localStream.current = null;
+  }
+
+  if (remoteVideo.current) {
+    remoteVideo.current.srcObject = null;
+  }
+
+  if (localVideo.current) {
+    localVideo.current.srcObject = null;
+
+  }
+
+  hasPlayedRemote = false;
+};
+
 
 export default function MeetingRoom() {
   const { bookingId } = useParams();
@@ -26,6 +61,8 @@ export default function MeetingRoom() {
   const [accessAllowed, setAccessAllowed] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [connectionState, setConnectionState] = useState("new");
+  const [remoteStreamReceived, setRemoteStreamReceived] = useState(false);
 
   const localVideo = useRef(null);
   const remoteVideo = useRef(null);
@@ -59,8 +96,6 @@ export default function MeetingRoom() {
         }
 
         setAccessAllowed(true);
-
-        // ❗Only call setupWebRTC ONCE
         await setupWebRTC(bookingId);
       } catch (err) {
         console.error("Initialization failed:", err);
@@ -72,16 +107,64 @@ export default function MeetingRoom() {
     };
 
     init();
+
+    // Cleanup on unmount
+    return () => {
+      if (localStream.current) {
+        localStream.current.getTracks().forEach(track => track.stop());
+      }
+      if (peerConnection.current) {
+        peerConnection.current.close();
+      }
+      socket.off();
+    };
   }, [bookingId]);
+
+
+
 
   const setupWebRTC = async (roomId) => {
     let isOfferer = false;
+   
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
+      console.log("🎬 Setting up WebRTC for room:", roomId);
+      
+      // Get user media
+      // const stream = await navigator.mediaDevices.getUserMedia({
+      //   video: true,
+      //   audio: true,
+      // });
+      const requestMediaStream = () =>
+        new Promise((resolve, reject) => {
+          navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then((stream) => {
+              localStream.current = stream;
+              if (localVideo.current) localVideo.current.srcObject = stream;
+              console.log("✅ Media stream acquired");
+              resolve(stream); // ✅ return stream
+            })
+            .catch((err) => {
+              console.warn("❌ First attempt failed, retrying in 500ms...", err);
+              setTimeout(() => {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                  .then((stream) => {
+                    localStream.current = stream;
+                    if (localVideo.current) localVideo.current.srcObject = stream;
+                    console.log("✅ Media stream acquired on retry");
+                    resolve(stream); // ✅ return stream
+                  })
+                  .catch((finalErr) => {
+                    console.error("🚫 Final camera/mic error:", finalErr);
+                    alert("Could not access camera or mic. Please check permissions.");
+                    reject(finalErr);
+                  });
+              }, 500);
+            });
+        });
+      
+
+      const stream = await requestMediaStream();
 
       localStream.current = stream;
 
@@ -89,78 +172,199 @@ export default function MeetingRoom() {
         localVideo.current.srcObject = stream;
       }
 
+      // Create peer connection
       peerConnection.current = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" }
+        ],
       });
 
-      stream
-        .getTracks()
-        .forEach((track) => peerConnection.current.addTrack(track, stream));
+      // Add local stream tracks
+      stream.getTracks().forEach((track) => {
+        console.log("➕ Adding track:", track.kind);
+        peerConnection.current.addTrack(track, stream);
+      });
 
+      // Handle remote stream
       peerConnection.current.ontrack = (event) => {
-        console.log("🎥 Remote stream received");
-        if (remoteVideo.current) {
-          remoteVideo.current.srcObject = event.streams[0];
+        console.log("🎥 Remote stream received:", event);
+        console.log("Remote streams count:", event.streams.length);
+        
+        // if (event.streams && event.streams[0]) {
+        //   setRemoteStreamReceived(true);
+        //   if (remoteVideo.current) {
+        //     remoteVideo.current.srcObject = event.streams[0];
+        //     console.log("✅ Remote video element updated");
+        //   }
+        // }
+
+        if (event.streams && event.streams[0]) {
+          setRemoteStreamReceived(true);
+        
+          const remoteStream = event.streams[0];
+          if (
+            remoteVideo.current &&
+            (!remoteVideo.current.srcObject || remoteVideo.current.srcObject !== remoteStream)
+          ) {
+            remoteVideo.current.srcObject = remoteStream;
+            console.log("✅ Remote video stream assigned");
+        
+            setTimeout(() => {
+              remoteVideo.current
+                .play()
+                .then(() => {
+                  console.log("📺 Remote video is playing");
+                  hasPlayedRemote = true;
+                })
+                .catch((err) => {
+                  console.error("❌ Remote video play() failed:", err);
+                });
+            }, 50);
+          }
         }
+        
       };
 
+      // Handle ICE candidates
       peerConnection.current.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log("🧊 Sending ICE candidate");
           socket.emit("ice-candidate", { candidate: event.candidate, roomId });
+        } else {
+          console.log("🧊 All ICE candidates sent");
         }
       };
 
-      // Clear previous listeners
+      // Handle connection state changes
+      peerConnection.current.onconnectionstatechange = () => {
+        const state = peerConnection.current.connectionState;
+        console.log("🔗 Connection state changed:", state);
+        setConnectionState(state);
+      };
+
+      peerConnection.current.onicegatheringstatechange = () => {
+        console.log("🧊 ICE gathering state:", peerConnection.current.iceGatheringState);
+      };
+
+      peerConnection.current.oniceconnectionstatechange = () => {
+        console.log("🧊 ICE connection state:", peerConnection.current.iceConnectionState);
+      };
+
+      // Clear previous listeners to avoid duplicates
       socket.off("ready");
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
+      socket.off("user-disconnected");
 
-      // Join room and determine if offerer
-      socket.emit("join-room", roomId, (clientCount) => {
-        console.log("Joined room. Total clients:", clientCount);
-        if (clientCount === 1) {
-          isOfferer = true;
-        }
-      });
-
-      socket.on("ready", async () => {
-        if (isOfferer) {
-          console.log("📤 Creating offer...");
-          const offer = await peerConnection.current.createOffer();
-          await peerConnection.current.setLocalDescription(offer);
-          socket.emit("offer", { sdp: offer, roomId });
-        }
-      });
-
-      socket.on("offer", async (sdp) => {
-        console.log("📩 Offer received");
-        await peerConnection.current.setRemoteDescription(
-          new RTCSessionDescription(sdp)
-        );
-        const answer = await peerConnection.current.createAnswer();
-        await peerConnection.current.setLocalDescription(answer);
-        socket.emit("answer", { sdp: answer, roomId });
-      });
-
-      socket.on("answer", async (sdp) => {
-        console.log("✅ Answer received");
-        await peerConnection.current.setRemoteDescription(
-          new RTCSessionDescription(sdp)
-        );
-      });
-
-      socket.on("ice-candidate", async ({ candidate }) => {
-        if (candidate) {
-          try {
-            await peerConnection.current.addIceCandidate(
-              new RTCIceCandidate(candidate)
-            );
-          } catch (err) {
-            console.error("❌ Failed to add ICE candidate:", err);
+      // Join room
+      socket.emit("join-room", roomId, (response) => {
+        console.log("🏠 Join room response:", response);
+        if (typeof response === 'number') {
+          // Old callback style
+          const clientCount = response;
+          console.log("Joined room. Total clients:", clientCount);
+          if (clientCount === 1) {
+            isOfferer = true;
+            console.log("👤 I am the offerer");
+          }
+        } else if (response && response.clientCount) {
+          // New callback style
+          console.log("Joined room. Total clients:", response.clientCount);
+          if (response.clientCount === 1) {
+            isOfferer = true;
+            console.log("👤 I am the offerer");
           }
         }
       });
+
+      // Handle ready signal (when second user joins)
+      socket.on("ready", async () => {
+        console.log("🚀 Ready signal received, isOfferer:", isOfferer);
+        if (isOfferer) {
+          try {
+            console.log("📤 Creating offer...");
+            const offer = await peerConnection.current.createOffer({
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true
+            });
+            await peerConnection.current.setLocalDescription(offer);
+            console.log("📤 Sending offer:", offer);
+            socket.emit("offer", { sdp: offer, roomId });
+          } catch (err) {
+            console.error("❌ Error creating offer:", err);
+          }
+        }
+      });
+
+      // Handle incoming offer
+      socket.on("offer", async (data) => {
+        console.log("📥 Offer received:", data);
+        try {
+          // Check if data is the SDP object directly or wrapped
+          const sdpData = data.sdp || data;
+          console.log("📥 SDP data:", sdpData);
+          
+          await peerConnection.current.setRemoteDescription(new RTCSessionDescription(sdpData));
+          
+          const answer = await peerConnection.current.createAnswer();
+          await peerConnection.current.setLocalDescription(answer);
+          
+          console.log("📤 Sending answer:", answer);
+          socket.emit("answer", { sdp: answer, roomId });
+        } catch (err) {
+          console.error("❌ Error handling offer:", err);
+        }
+      });
+
+      // Handle incoming answer
+      socket.on("answer", async (data) => {
+        console.log("📥 Answer received:", data);
+        try {
+          // Check if data is the SDP object directly or wrapped
+          const sdpData = data.sdp || data;
+          console.log("📥 SDP data:", sdpData);
+          
+          await peerConnection.current.setRemoteDescription(new RTCSessionDescription(sdpData));
+          console.log("✅ Remote description set successfully");
+        } catch (err) {
+          console.error("❌ Error handling answer:", err);
+        }
+      });
+
+      // Handle ICE candidates
+      socket.on("ice-candidate", async (data) => {
+        console.log("🧊 ICE candidate received:", data);
+        try {
+          const { candidate } = data;
+          if (candidate && peerConnection.current.remoteDescription) {
+            await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+            console.log("✅ ICE candidate added successfully");
+          } else {
+            console.log("⏳ Queueing ICE candidate (no remote description yet)");
+          }
+        } catch (err) {
+          console.error("❌ Failed to add ICE candidate:", err);
+        }
+      });
+
+      // Handle user disconnection
+      // socket.on("user-disconnected", () => {
+      //   console.log("👋 User disconnected");
+      //   setRemoteStreamReceived(false);
+      //   if (remoteVideo.current) {
+      //     remoteVideo.current.srcObject = null;
+      //   }
+      // });
+      socket.on("user-disconnected", () => {
+        console.log("👋 Remote user disconnected");
+        setRemoteStreamReceived(false);
+        cleanupWebRTC({ peerConnection, localStream, localVideo, remoteVideo });
+      });
+      
+      
+
     } catch (err) {
       console.error("🚫 setupWebRTC error:", err);
       alert("Could not access camera/mic or establish connection.");
@@ -187,16 +391,24 @@ export default function MeetingRoom() {
     }
   };
 
+  // const endCall = () => {
+  //   if (localStream.current) {
+  //     localStream.current.getTracks().forEach(track => track.stop());
+  //   }
+  //   if (peerConnection.current) {
+  //     peerConnection.current.close();
+  //   }
+  //   socket.disconnect();
+  //   navigate("/");
+  // };
+
   const endCall = () => {
-    if (localStream.current) {
-      localStream.current.getTracks().forEach((track) => track.stop());
-    }
-    if (peerConnection.current) {
-      peerConnection.current.close();
-    }
+    cleanupWebRTC({ peerConnection, localStream, localVideo, remoteVideo });
+    socket.emit("leave-room", bookingId);
     socket.disconnect();
     navigate("/");
   };
+  
 
   if (loading) {
     return (
@@ -217,8 +429,13 @@ export default function MeetingRoom() {
       <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+            <div className={`w-3 h-3 rounded-full ${
+              connectionState === 'connected' ? 'bg-green-500' : 
+              connectionState === 'connecting' ? 'bg-yellow-500 animate-pulse' : 
+              'bg-red-500 animate-pulse'
+            }`}></div>
             <h1 className="text-xl font-semibold text-white">Meeting Room</h1>
+            <span className="text-xs text-gray-400 capitalize">({connectionState})</span>
           </div>
           <div className="text-sm text-gray-300">
             Room ID: {bookingId?.slice(-8)}
@@ -239,20 +456,34 @@ export default function MeetingRoom() {
                   playsInline
                   className="w-full h-full object-cover"
                 />
+                {!remoteStreamReceived && (
+                  <div className="absolute inset-0 bg-gray-700 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-300 text-sm">Waiting for remote user...</p>
+                    </div>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-4 left-4">
                     <div className="bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full">
-                      <span className="text-white text-sm font-medium">
-                        Remote
-                      </span>
+                      <span className="text-white text-sm font-medium">Remote</span>
                     </div>
                   </div>
                 </div>
                 {/* Connection Status Indicator */}
                 <div className="absolute top-4 right-4">
                   <div className="flex items-center space-x-2 bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-white text-xs">Connected</span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      remoteStreamReceived ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
+                    }`}></div>
+                    <span className="text-white text-xs">
+                      {remoteStreamReceived ? 'Connected' : 'Waiting...'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -271,9 +502,7 @@ export default function MeetingRoom() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-4 left-4">
                     <div className="bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full">
-                      <span className="text-white text-sm font-medium">
-                        You
-                      </span>
+                      <span className="text-white text-sm font-medium">You</span>
                     </div>
                   </div>
                 </div>
@@ -282,18 +511,8 @@ export default function MeetingRoom() {
                   <div className="absolute inset-0 bg-gray-700 flex items-center justify-center">
                     <div className="text-center">
                       <div className="w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg
-                          className="w-10 h-10 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
+                        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       </div>
                       <p className="text-gray-300 text-sm">Camera Off</p>
@@ -312,33 +531,17 @@ export default function MeetingRoom() {
                 <button
                   onClick={toggleMute}
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
-                    isMuted
-                      ? "bg-red-500 hover:bg-red-600 text-white"
-                      : "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white"
+                    isMuted 
+                      ? 'bg-red-500 hover:bg-red-600 text-white' 
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white'
                   }`}
                   title={isMuted ? "Unmute" : "Mute"}
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {isMuted ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                        clipRule="evenodd"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clipRule="evenodd" />
                     ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                     )}
                   </svg>
                 </button>
@@ -347,32 +550,17 @@ export default function MeetingRoom() {
                 <button
                   onClick={toggleVideo}
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
-                    isVideoOff
-                      ? "bg-red-500 hover:bg-red-600 text-white"
-                      : "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white"
+                    isVideoOff 
+                      ? 'bg-red-500 hover:bg-red-600 text-white' 
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white'
                   }`}
                   title={isVideoOff ? "Turn on camera" : "Turn off camera"}
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {isVideoOff ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 12l-1.41-1.41L16 13.17V6a2 2 0 00-2-2H4.83l1.58-1.58L5 1l-4 4v1h1v10a2 2 0 002 2h10a2 2 0 002-2v-7.17l2.59 2.58L20 12z"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12l-1.41-1.41L16 13.17V6a2 2 0 00-2-2H4.83l1.58-1.58L5 1l-4 4v1h1v10a2 2 0 002 2h10a2 2 0 002-2v-7.17l2.59 2.58L20 12z" />
                     ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     )}
                   </svg>
                 </button>
@@ -383,18 +571,8 @@ export default function MeetingRoom() {
                   className="w-12 h-12 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-all duration-200 transform hover:scale-105"
                   title="End call"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 16.5v2.25A2.25 2.25 0 005.25 21h2.25M3 16.5V14.25A2.25 2.25 0 015.25 12H8.5m7 8.25h2.25A2.25 2.25 0 0020.25 18.75V16.5M17.5 12h2.25A2.25 2.25 0 0122.5 14.25V16.5"
-                    />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 16.5v2.25A2.25 2.25 0 005.25 21h2.25M3 16.5V14.25A2.25 2.25 0 015.25 12H8.5m7 8.25h2.25A2.25 2.25 0 0020.25 18.75V16.5M17.5 12h2.25A2.25 2.25 0 0122.5 14.25V16.5" />
                   </svg>
                 </button>
 
@@ -404,18 +582,8 @@ export default function MeetingRoom() {
                   title="Share screen"
                   disabled
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </button>
 
@@ -425,24 +593,9 @@ export default function MeetingRoom() {
                   title="Settings"
                   disabled
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </button>
               </div>
