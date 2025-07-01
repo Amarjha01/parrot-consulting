@@ -3,10 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { getBookingById } from "../service/bookingApi";
 
-// const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:8010", {
-//   withCredentials: true,
-// });
-
 let hasPlayedRemote = false;
 const cleanupWebRTC = ({
   peerConnection,
@@ -39,6 +35,8 @@ const cleanupWebRTC = ({
 
 export default function MeetingRoom() {
   const [hasLocalVideo, setHasLocalVideo] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  let screenVideoTrackRef = useRef(null); // Keeps screen track reference
 
   const { bookingId } = useParams();
   const navigate = useNavigate();
@@ -55,489 +53,6 @@ export default function MeetingRoom() {
   const peerConnection = useRef(null);
   const localStream = useRef(null);
 
-  // useEffect(() => {
-  //   const socket = io(
-  //     import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com",
-  //     {
-  //       transports: ["websocket"],
-  //       withCredentials: true,
-  //     }
-  //   );
-
-  //   socketRef.current = socket;
-
-  //   // const init = async () => {
-  //   //   try {
-  //   //     const booking = await getBookingById(bookingId);
-  //   //     const rawUser =
-  //   //       localStorage.getItem("user") || localStorage.getItem("consultant");
-  //   //     if (!rawUser) throw new Error("User not logged in");
-
-  //   //     const parsed = JSON.parse(rawUser);
-  //   //     const currentUser = parsed.data || parsed;
-
-  //   //     const consultantId =
-  //   //       typeof booking.consultant === "object"
-  //   //         ? booking.consultant._id
-  //   //         : booking.consultant;
-  //   //     const userId =
-  //   //       typeof booking.user === "object" ? booking.user._id : booking.user;
-
-  //   //     const isConsultant = currentUser._id === consultantId;
-  //   //     const isUser = currentUser._id === userId;
-
-  //   //     if (!isConsultant && !isUser) {
-  //   //       alert("Unauthorized");
-  //   //       return navigate("/");
-  //   //     }
-
-  //   //     setAccessAllowed(true);
-  //   //     await setupWebRTC(bookingId);
-  //   //   } catch (err) {
-  //   //     console.error("Initialization failed:", err);
-  //   //     alert("Failed to join meeting.");
-  //   //     navigate("/");
-  //   //   } finally {
-  //   //     setLoading(false);
-  //   //   }
-  //   // };
-  //   const init = async () => {
-  //     try {
-  //       const booking = await getBookingById(bookingId);
-  //       const rawUser =
-  //         localStorage.getItem("user") || localStorage.getItem("consultant");
-  //       if (!rawUser) throw new Error("User not logged in");
-
-  //       const parsed = JSON.parse(rawUser);
-  //       const currentUser = parsed.data || parsed;
-
-  //       const consultantId =
-  //         typeof booking.consultant === "object"
-  //           ? booking.consultant._id
-  //           : booking.consultant;
-
-  //       const userId =
-  //         typeof booking.user === "object" ? booking.user._id : booking.user;
-
-  //       const isConsultant = currentUser._id === consultantId;
-  //       const isUser = currentUser._id === userId;
-
-  //       if (!isConsultant && !isUser) {
-  //         alert("Unauthorized");
-  //         return navigate("/");
-  //       }
-
-  //       setAccessAllowed(true);
-
-  //       await cleanupWebRTC({
-  //         peerConnection,
-  //         localStream,
-  //         localVideo,
-  //         remoteVideo,
-  //       }); // ✅ CLEAR OLD CONNECTION
-  //       await setupWebRTC(bookingId); // ✅ THEN SETUP FRESH
-  //     } catch (err) {
-  //       console.error("Initialization failed:", err);
-  //       alert("Failed to join meeting.");
-  //       navigate("/");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   init();
-
-  //   // Cleanup on unmount
-  //   // return () => {
-  //   //   if (localStream.current) {
-  //   //     localStream.current.getTracks().forEach((track) => track.stop());
-  //   //   }
-  //   //   if (peerConnection.current) {
-  //   //     peerConnection.current.close();
-  //   //   }
-  //   //   socketRef.current.off();
-  //   // };
-
-  //   // return () => {
-  //   //   if (socketRef.current) {
-  //   //     socketRef.current.emit("leave-room", bookingId);
-  //   //     socketRef.current.off();
-  //   //     socketRef.current.disconnect();
-  //   //   }
-
-  //   //   cleanupWebRTC({ peerConnection, localStream, localVideo, remoteVideo });
-  //   // };
-  //   return () => {
-  //     if (socketRef.current) {
-  //       socketRef.current.emit("leave-room", bookingId); // optional
-  //       socketRef.current.disconnect();
-  //       socketRef.current.off();
-  //     }
-
-  //     cleanupWebRTC({
-  //       peerConnection,
-  //       localStream,
-  //       localVideo,
-  //       remoteVideo,
-  //     });
-  //     setHasLocalVideo(false);
-  //   };
-  // }, [bookingId]);
-
-  // const setupWebRTC = async (roomId) => {
-  //   let isOfferer = false;
-
-  //   try {
-  //     console.log("🎬 Setting up WebRTC for room:", roomId);
-
-  //     // Get user media
-  //     // const stream = await navigator.mediaDevices.getUserMedia({
-  //     //   video: true,
-  //     //   audio: true,
-  //     // });
-  //     const requestMediaStream = () =>
-  //       new Promise((resolve, reject) => {
-  //         console.log("🎥 Requesting media devices...");
-
-  //         navigator.mediaDevices
-  //           .getUserMedia({ video: true, audio: true })
-  //           .then((stream) => {
-  //             console.log("🎥 Local stream tracks:", stream.getTracks());
-  //             console.log(
-  //               "🎥 Audio track enabled:",
-  //               stream.getAudioTracks()?.[0]?.enabled
-  //             );
-  //             console.log(
-  //               "🎥 Video track enabled:",
-  //               stream.getVideoTracks()?.[0]?.enabled
-  //             );
-
-  //             localStream.current = stream;
-  //             if (localVideo.current) localVideo.current.srcObject = stream;
-  //             console.log("✅ Media stream acquired");
-  //             resolve(stream); // ✅ return stream
-  //           })
-  //           .catch((err) => {
-  //             console.warn(
-  //               "❌ First attempt failed, retrying in 500ms...",
-  //               err
-  //             );
-  //             setTimeout(() => {
-  //               navigator.mediaDevices
-  //                 .getUserMedia({ video: true, audio: true })
-  //                 .then((stream) => {
-  //                   localStream.current = stream;
-  //                   if (localVideo.current)
-  //                     localVideo.current.srcObject = stream;
-  //                   console.log("✅ Media stream acquired on retry");
-  //                   resolve(stream); // ✅ return stream
-  //                 })
-  //                 .catch((finalErr) => {
-  //                   console.error("🚫 Final camera/mic error:", finalErr);
-  //                   alert(
-  //                     "Could not access camera or mic. Please check permissions."
-  //                   );
-  //                   reject(finalErr);
-  //                 });
-  //             }, 500);
-  //           });
-  //       });
-
-  //     const stream = await requestMediaStream();
-
-  //     // localStream.current = stream;
-
-  //     // if (localVideo.current) {
-  //     //   localVideo.current.srcObject = stream;
-  //     // }
-  //     localStream.current = stream;
-
-  //     stream.getTracks().forEach((track) => {
-  //       console.log("📷 Local track:", track.kind, "enabled:", track.enabled);
-  //     });
-
-  //     if (!stream.getVideoTracks()[0]) {
-  //       console.warn("⚠️ No video track found in local stream");
-  //     }
-
-  //     if (localVideo.current) {
-  //       localVideo.current.srcObject = stream;
-  //       console.log("🎞️ Checking local video DOM state");
-  //       console.log("srcObject exists:", !!localVideo.current?.srcObject);
-  //       console.log("Video tag muted:", localVideo.current?.muted);
-  //       console.log(
-  //         "Video visibility (offsetHeight):",
-  //         localVideo.current?.offsetHeight
-  //       );
-  //       console.log(
-  //         "Video visibility (offsetWidth):",
-  //         localVideo.current?.offsetWidth
-  //       );
-  //       console.log(
-  //         "Track count in srcObject:",
-  //         localVideo.current?.srcObject?.getTracks().length
-  //       );
-  //       console.log(
-  //         "Track types:",
-  //         localVideo.current?.srcObject?.getTracks().map((t) => t.kind)
-  //       );
-
-  //       console.log("📌 Assigned stream to local video element", stream);
-  //       console.log("localVideo.current", localVideo.current);
-
-  //       // ✅ Force video playback (autoplay fix)
-  //       setTimeout(() => {
-  //         localVideo.current
-  //           .play()
-  //           .then(() => {
-  //             console.log("📺 Local video is playing");
-  //           })
-  //           .catch((err) => {
-  //             console.error("❌ Local video play() failed:", err);
-  //           });
-  //       }, 50);
-  //     }
-
-  //     // if (localVideo.current) {
-  //     //   localVideo.current.srcObject = stream;
-
-  //     //   // Force playback for browsers with autoplay restrictions
-  //     //   setTimeout(() => {
-  //     //     localVideo.current
-  //     //       .play()
-  //     //       .then(() => {
-  //     //         console.log("📺 Local video is playing");
-  //     //       })
-  //     //       .catch((err) => {
-  //     //         console.error("❌ Local video play() failed:", err);
-  //     //       });
-  //     //   }, 50);
-  //     // }
-
-  //     // Create peer connection
-  //     peerConnection.current = new RTCPeerConnection({
-  //       iceServers: [
-  //         { urls: "stun:stun.l.google.com:19302" },
-  //         { urls: "stun:stun1.l.google.com:19302" },
-  //       ],
-  //     });
-
-  //     // Add local stream tracks
-  //     stream.getTracks().forEach((track) => {
-  //       console.log("➕ Adding track:", track.kind);
-  //       peerConnection.current.addTrack(track, stream);
-  //     });
-
-  //     // Handle remote stream
-  //     peerConnection.current.ontrack = (event) => {
-  //       console.log("🎥 Remote stream received:", event);
-  //       console.log("Remote streams count:", event.streams.length);
-
-  //       // if (event.streams && event.streams[0]) {
-  //       //   setRemoteStreamReceived(true);
-  //       //   if (remoteVideo.current) {
-  //       //     remoteVideo.current.srcObject = event.streams[0];
-  //       //     console.log("✅ Remote video element updated");
-  //       //   }
-  //       // }
-
-  //       if (event.streams && event.streams[0]) {
-  //         setRemoteStreamReceived(true);
-
-  //         const remoteStream = event.streams[0];
-  //         if (
-  //           remoteVideo.current &&
-  //           (!remoteVideo.current.srcObject ||
-  //             remoteVideo.current.srcObject !== remoteStream)
-  //         ) {
-  //           remoteVideo.current.srcObject = remoteStream;
-  //           console.log("✅ Remote video stream assigned");
-
-  //           setTimeout(() => {
-  //             remoteVideo.current
-  //               .play()
-  //               .then(() => {
-  //                 console.log("📺 Remote video is playing");
-  //                 hasPlayedRemote = true;
-  //               })
-  //               .catch((err) => {
-  //                 console.error("❌ Remote video play() failed:", err);
-  //               });
-  //           }, 50);
-  //         }
-  //       }
-  //     };
-
-  //     // Handle ICE candidates
-  //     peerConnection.current.onicecandidate = (event) => {
-  //       if (event.candidate) {
-  //         console.log("🧊 Sending ICE candidate");
-  //         // socketRef.current.emit("ice-candidate", { candidate: event.candidate, roomId });
-  //         socketRef.current.emit("ice-candidate", {
-  //           candidate: event.candidate,
-  //           roomId,
-  //         });
-  //       } else {
-  //         console.log("🧊 All ICE candidates sent");
-  //       }
-  //     };
-
-  //     // Handle connection state changes
-  //     peerConnection.current.onconnectionstatechange = () => {
-  //       const state = peerConnection.current.connectionState;
-  //       console.log("🔗 Connection state changed:", state);
-  //       setConnectionState(state);
-  //     };
-
-  //     peerConnection.current.onicegatheringstatechange = () => {
-  //       console.log(
-  //         "🧊 ICE gathering state:",
-  //         peerConnection.current.iceGatheringState
-  //       );
-  //     };
-
-  //     peerConnection.current.oniceconnectionstatechange = () => {
-  //       console.log(
-  //         "🧊 ICE connection state:",
-  //         peerConnection.current.iceConnectionState
-  //       );
-  //     };
-
-  //     // Clear previous listeners to avoid duplicates
-  //     socketRef.current.off("ready");
-  //     socketRef.current.off("offer");
-  //     socketRef.current.off("answer");
-  //     socketRef.current.off("ice-candidate");
-  //     socketRef.current.off("user-disconnected");
-
-  //     // Join room
-  //     // socketRef.current.emit("join-room", roomId, (response) => {
-  //     socketRef.current.emit("join-room", roomId, (response) => {
-  //       console.log("🏠 Join room response:", response);
-  //       if (typeof response === "number") {
-  //         // Old callback style
-  //         const clientCount = response;
-  //         console.log("Joined room. Total clients:", clientCount);
-  //         if (clientCount === 1) {
-  //           isOfferer = true;
-  //           console.log("👤 I am the offerer");
-  //         }
-  //       } else if (response && response.clientCount) {
-  //         // New callback style
-  //         console.log("Joined room. Total clients:", response.clientCount);
-  //         if (response.clientCount === 1) {
-  //           isOfferer = true;
-  //           console.log("👤 I am the offerer");
-  //         }
-  //       }
-  //     });
-
-  //     // Handle ready signal (when second user joins)
-  //     // socketRef.current.on("ready", async () => {
-  //     socketRef.current.on("ready", async () => {
-  //       console.log("🚀 Ready signal received, isOfferer:", isOfferer);
-  //       if (isOfferer) {
-  //         try {
-  //           console.log("📤 Creating offer...");
-  //           const offer = await peerConnection.current.createOffer({
-  //             offerToReceiveAudio: true,
-  //             offerToReceiveVideo: true,
-  //           });
-  //           await peerConnection.current.setLocalDescription(offer);
-  //           console.log("📤 Sending offer:", offer);
-  //           // socketRef.current.emit("offer", { sdp: offer, roomId });
-  //           socketRef.current.emit("offer", { sdp: offer, roomId });
-  //         } catch (err) {
-  //           console.error("❌ Error creating offer:", err);
-  //         }
-  //       }
-  //     });
-
-  //     // Handle incoming offer
-  //     // socketRef.current.on("offer", async (data) => {
-  //     socketRef.current.on("offer", async (data) => {
-  //       console.log("📥 Offer received:", data);
-  //       try {
-  //         // Check if data is the SDP object directly or wrapped
-  //         const sdpData = data.sdp || data;
-  //         console.log("📥 SDP data:", sdpData);
-
-  //         await peerConnection.current.setRemoteDescription(
-  //           new RTCSessionDescription(sdpData)
-  //         );
-
-  //         const answer = await peerConnection.current.createAnswer();
-  //         await peerConnection.current.setLocalDescription(answer);
-
-  //         console.log("📤 Sending answer:", answer);
-  //         // socketRef.current.emit("answer", { sdp: answer, roomId });
-  //         socketRef.current.emit("answer", { sdp: answer, roomId });
-  //       } catch (err) {
-  //         console.error("❌ Error handling offer:", err);
-  //       }
-  //     });
-
-  //     // Handle incoming answer
-  //     // socketRef.current.on("answer", async (data) => {
-  //     socketRef.current.on("answer", async (data) => {
-  //       console.log("📥 Answer received:", data);
-  //       try {
-  //         // Check if data is the SDP object directly or wrapped
-  //         const sdpData = data.sdp || data;
-  //         console.log("📥 SDP data:", sdpData);
-
-  //         await peerConnection.current.setRemoteDescription(
-  //           new RTCSessionDescription(sdpData)
-  //         );
-  //         console.log("✅ Remote description set successfully");
-  //       } catch (err) {
-  //         console.error("❌ Error handling answer:", err);
-  //       }
-  //     });
-
-  //     // Handle ICE candidates
-  //     // socketRef.current.on("ice-candidate", async (data) => {
-  //     socketRef.current.on("ice-candidate", async (data) => {
-  //       console.log("🧊 ICE candidate received:", data);
-  //       try {
-  //         const { candidate } = data;
-  //         if (candidate && peerConnection.current.remoteDescription) {
-  //           await peerConnection.current.addIceCandidate(
-  //             new RTCIceCandidate(candidate)
-  //           );
-  //           console.log("✅ ICE candidate added successfully");
-  //         } else {
-  //           console.log(
-  //             "⏳ Queueing ICE candidate (no remote description yet)"
-  //           );
-  //         }
-  //       } catch (err) {
-  //         console.error("❌ Failed to add ICE candidate:", err);
-  //       }
-  //     });
-
-  //     // Handle user disconnection
-  //     // socketRef.current.on("user-disconnected", () => {
-  //     //   console.log("👋 User disconnected");
-  //     //   setRemoteStreamReceived(false);
-  //     //   if (remoteVideo.current) {
-  //     //     remoteVideo.current.srcObject = null;
-  //     //   }
-  //     // });
-  //     // socketRef.current.on("user-disconnected", () => {
-  //     socketRef.current.on("user-disconnected", () => {
-  //       console.log("👋 Remote user disconnected");
-  //       setRemoteStreamReceived(false);
-  //       cleanupWebRTC({ peerConnection, localStream, localVideo, remoteVideo });
-  //     });
-  //   } catch (err) {
-  //     console.error("🚫 setupWebRTC error:", err);
-  //     alert(
-  //       `Could not access camera/mic or establish connection.\n\n${err.message}`
-  //     );
-  //   }
-  // };
-
   useEffect(() => {
     const socket = io(
       import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com",
@@ -547,33 +62,33 @@ export default function MeetingRoom() {
       }
     );
     socketRef.current = socket;
-  
+
     const initAccess = async () => {
       try {
         const booking = await getBookingById(bookingId);
         const rawUser =
           localStorage.getItem("user") || localStorage.getItem("consultant");
         if (!rawUser) throw new Error("User not logged in");
-  
+
         const parsed = JSON.parse(rawUser);
         const currentUser = parsed.data || parsed;
-  
+
         const consultantId =
           typeof booking.consultant === "object"
             ? booking.consultant._id
             : booking.consultant;
-  
+
         const userId =
           typeof booking.user === "object" ? booking.user._id : booking.user;
-  
+
         const isConsultant = currentUser._id === consultantId;
         const isUser = currentUser._id === userId;
-  
+
         if (!isConsultant && !isUser) {
           alert("Unauthorized");
           return navigate("/");
         }
-  
+
         setAccessAllowed(true); // ✅ Now your JSX video can render
       } catch (err) {
         console.error("Initialization failed:", err);
@@ -583,47 +98,46 @@ export default function MeetingRoom() {
         setLoading(false);
       }
     };
-  
+
     initAccess();
-  
+
     return () => {
       if (socketRef.current) {
         socketRef.current.emit("leave-room", bookingId);
         socketRef.current.disconnect();
         socketRef.current.off();
       }
-  
+
       cleanupWebRTC({
         peerConnection,
         localStream,
         localVideo,
         remoteVideo,
       });
-  
+
       setHasLocalVideo(false);
     };
   }, [bookingId]);
-  
+
   useEffect(() => {
     if (!accessAllowed) return;
     if (!localVideo.current) return;
-  
+
     const setup = async () => {
       console.log("✅ localVideo ref is ready:", localVideo.current);
-  
+
       await cleanupWebRTC({
         peerConnection,
         localStream,
         localVideo,
         remoteVideo,
       });
-  
+
       await setupWebRTC(bookingId);
     };
-  
+
     setup();
   }, [accessAllowed, localVideo.current]); // 👈 this triggers when video ref is ready
-  
 
   const setupWebRTC = async (roomId) => {
     let isOfferer = false;
@@ -898,23 +412,67 @@ export default function MeetingRoom() {
     }
   };
 
-  // const endCall = () => {
-  //   if (localStream.current) {
-  //     localStream.current.getTracks().forEach(track => track.stop());
-  //   }
-  //   if (peerConnection.current) {
-  //     peerConnection.current.close();
-  //   }
-  //   socketRef.current.disconnect();
-  //   navigate("/");
-  // };
+  const startScreenShare = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
 
-  // const endCall = () => {
-  //   cleanupWebRTC({ peerConnection, localStream, localVideo, remoteVideo });
-  //   socketRef.current.emit("leave-room", bookingId);
-  //   socketRef.current.disconnect();
-  //   navigate("/");
-  // };
+      const screenVideoTrack = screenStream.getVideoTracks()[0];
+      const screenAudioTrack = screenStream.getAudioTracks()[0];
+
+      const senders = peerConnection.current.getSenders();
+
+      const videoSender = senders.find((s) => s.track?.kind === "video");
+      const audioSender = senders.find((s) => s.track?.kind === "audio");
+
+      if (videoSender && screenVideoTrack) {
+        await videoSender.replaceTrack(screenVideoTrack);
+        screenVideoTrackRef.current = screenVideoTrack;
+        setIsScreenSharing(true);
+      }
+
+      if (audioSender && screenAudioTrack) {
+        await audioSender.replaceTrack(screenAudioTrack);
+      }
+
+      screenVideoTrack.onended = () => {
+        stopScreenShare();
+      };
+    } catch (err) {
+      console.error("Screen sharing failed:", err);
+      alert("Screen sharing failed or was cancelled.");
+    }
+  };
+
+  const stopScreenShare = async () => {
+    try {
+      const camVideoTrack = localStream.current?.getVideoTracks()[0];
+      const micAudioTrack = localStream.current?.getAudioTracks()[0];
+
+      const senders = peerConnection.current.getSenders();
+      const videoSender = senders.find((s) => s.track?.kind === "video");
+      const audioSender = senders.find((s) => s.track?.kind === "audio");
+
+      if (videoSender && camVideoTrack) {
+        await videoSender.replaceTrack(camVideoTrack);
+      }
+
+      if (audioSender && micAudioTrack) {
+        await audioSender.replaceTrack(micAudioTrack);
+      }
+
+      if (screenVideoTrackRef.current) {
+        screenVideoTrackRef.current.stop();
+        screenVideoTrackRef.current = null;
+      }
+
+      setIsScreenSharing(false);
+    } catch (err) {
+      console.error("Failed to stop screen share:", err);
+    }
+  };
 
   const endCall = () => {
     if (socketRef.current) {
@@ -1057,7 +615,7 @@ export default function MeetingRoom() {
                     }}
                   />
                 )}
-{/* 
+                {/* 
                 {!hasLocalVideo && (
                   <div
                     style={{
@@ -1117,7 +675,7 @@ export default function MeetingRoom() {
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
               <div className="flex items-center space-x-4">
                 {/* Mute Toggle */}
-                <button
+                {/* <button
                   onClick={toggleMute}
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
                     isMuted
@@ -1146,6 +704,42 @@ export default function MeetingRoom() {
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                      />
+                    )}
+                  </svg>
+                </button> */}
+
+                {/* Mic Mute/Unmute */}
+                <button
+                  onClick={toggleMute}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    isMuted
+                      ? "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                  }`}
+                  title={isMuted ? "Unmute Mic" : "Mute Mic"}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {isMuted ? (
+                      // Mic Off Icon
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5a3 3 0 016 0v6a3 3 0 01-6 0V5zm-4 6a8 8 0 0016 0M3 3l18 18"
+                      />
+                    ) : (
+                      // Mic On Icon
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 1v11a3 3 0 01-3 3H9a3 3 0 01-3-3V1m9 10a3 3 0 01-3 3h0a3 3 0 01-3-3"
                       />
                     )}
                   </svg>
@@ -1207,25 +801,49 @@ export default function MeetingRoom() {
                 </button>
 
                 {/* Screen Share (Placeholder) */}
-                <button
-                  className="w-12 h-12 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-all duration-200"
-                  title="Share screen"
-                  disabled
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {isScreenSharing ? (
+                  // Stop Sharing Button
+                  <button
+                    onClick={stopScreenShare}
+                    className="w-12 h-12 bg-yellow-500 hover:bg-yellow-600 rounded-full flex items-center justify-center text-white transition-all duration-200"
+                    title="Stop screen share"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                ) : (
+                  // Start Sharing Button
+                  <button
+                    onClick={startScreenShare}
+                    className="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 rounded-full flex items-center justify-center text-white transition-all duration-200"
+                    title="Share screen"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
+                )}
 
                 {/* Settings (Placeholder) */}
                 <button
