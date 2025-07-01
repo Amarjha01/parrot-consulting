@@ -10,6 +10,7 @@ import {
   DollarSign,
   Eye,
   Loader2,
+  Menu,
 } from "lucide-react";
 import { loginAsConsultant } from "../service/consultantApi";
 import { getBookingsByConsultantId } from "../service/bookingApi";
@@ -47,8 +48,14 @@ const ErrorMessage = ({ message, onRetry }) => (
   </div>
 );
 
-// Sidebar Navigation Component
-const Sidebar = ({ activeItem, setActiveItem, consultantData, onLogout }) => {
+const Sidebar = ({
+  activeItem,
+  setActiveItem,
+  consultantData,
+  onLogout,
+  mobileOpen,
+  setMobileOpen,
+}) => {
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "bookings", label: "My Bookings", icon: Calendar },
@@ -57,168 +64,179 @@ const Sidebar = ({ activeItem, setActiveItem, consultantData, onLogout }) => {
   ];
 
   return (
-    <div className="w-64 bg-gray-50 min-h-screen p-6 border-r border-gray-200">
-      {/* Logo */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-          <div className="w-6 h-6 bg-emerald-500 rounded-full"></div>
-        </div>
-        <div>
-          <a href="/"><h1 className="text-xl font-bold text-gray-900">PARROT</h1></a>
-          <p className="text-sm text-gray-600">CONSULT</p>
-        </div>
-      </div>
-
-      {/* Consultant Info */}
-      {consultantData && (
-        <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
-          <div className="flex items-center gap-3">
-            <img
-              src={
-                consultantData.data.profilePicture ||
-                "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-              }
-              alt={consultantData.data.name}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div>
-              <p className="text-sm font-medium text-gray-900">
-                {consultantData.data.name}
-              </p>
-              <p className="text-xs text-gray-600 capitalize">
-                {consultantData.data.primaryCategory}
-              </p>
-            </div>
+    <div
+      className={`fixed z-40 h-full lg:static top-0 left-0  w-72 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-r border-gray-700 shadow-xl transition-transform duration-300 ease-in-out transform flex flex-col justify-between ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:translate-x-0`}
+    >
+      {/* Top Content */}
+      <div className="p-6 space-y-6">
+        {/* Logo */}
+        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-lg">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-inner">
+            <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg"></div>
+          </div>
+          <div>
+            <a href="/">
+              <h1 className="text-lg font-bold text-white">PARROT</h1>
+            </a>
+            <p className="text-xs text-emerald-100 font-medium">CONSULT</p>
           </div>
         </div>
-      )}
 
-      {/* Navigation */}
-      <nav className="space-y-2 mb-8">
-        {navItems.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveItem(id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-              activeItem === id
-                ? "bg-emerald-100 text-emerald-700 font-medium"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <Icon size={20} />
-            {label}
-          </button>
-        ))}
-      </nav>
+        {/* Consultant Info */}
+        {consultantData && (
+          <div className="p-4 bg-gray-800 rounded-xl border border-gray-600 shadow">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img
+                  src={
+                    consultantData.data.profilePicture ||
+                    "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                  }
+                  alt={consultantData.data.name}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-emerald-400 shadow"
+                />
+                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-gray-800"></div>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white truncate">
+                  {consultantData.data.name}
+                </p>
+                <p className="text-xs text-gray-300 capitalize truncate">
+                  {consultantData.data.primaryCategory}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
-      {/* Logout */}
-      <button
-        onClick={onLogout}
-        className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <LogOut size={20} />
-        Logout
-      </button>
+        {/* Navigation */}
+        <nav className="space-y-2">
+          {navItems.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => {
+                setActiveItem(id);
+                setMobileOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 group ${
+                activeItem === id
+                  ? "bg-emerald-600 text-white font-semibold shadow-md"
+                  : "text-gray-300 hover:bg-gray-700 hover:text-white"
+              }`}
+            >
+              <Icon
+                size={20}
+                className={`${
+                  activeItem === id
+                    ? "text-white"
+                    : "text-gray-400 group-hover:text-emerald-400"
+                }`}
+              />
+              {label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Bottom Logout */}
+      <div className="p-6 pt-0">
+        <button
+          onClick={() => {
+            onLogout();
+            setMobileOpen(false);
+          }}
+          className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-all duration-200 w-full"
+        >
+          <LogOut size={20} className="group-hover:text-red-400" />
+          <span className="font-medium">Logout</span>
+        </button>
+      </div>
     </div>
   );
 };
 
-// Stats Card Component
 const StatsCard = ({ title, value, icon: Icon, color = "emerald" }) => {
   const colorClasses = {
-    emerald: "text-emerald-600 bg-emerald-50",
-    blue: "text-blue-600 bg-blue-50",
-    purple: "text-purple-600 bg-purple-50",
+    emerald:
+      "text-emerald-600 bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200",
+    blue: "text-blue-600 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200",
+    purple:
+      "text-purple-600 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200",
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 hover:transform hover:scale-105 transition-all duration-300 border-l-4 border-l-emerald-500">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-600 text-sm font-medium mb-1">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-gray-600 text-sm font-semibold mb-2 uppercase tracking-wide">
+            {title}
+          </p>
+          <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+          <div className="w-12 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
         </div>
-        <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-          <Icon size={24} />
+        <div
+          className={`p-4 rounded-2xl ${colorClasses[color]} border shadow-lg`}
+        >
+          <Icon size={28} />
         </div>
       </div>
     </Card>
   );
 };
 
-// Booking Card Component
-// const BookingCard = ({ booking }) => {
-//   const navigate = useNavigate();
-//   const [canJoin, setCanJoin] = useState(false);
-
-//   useEffect(() => {
-//     const checkJoinWindow = () => {
-//       const now = new Date();
-//       const start = new Date(booking.datetime);
-//       const duration = booking.duration || 30; // fallback to 30 mins
-//       const end = new Date(start.getTime() + duration * 60000);
-//       const joinOpen = new Date(start.getTime() - 2 * 60000); // 2 mins before
-
-//       const allowJoin = now >= joinOpen && now <= end;
-//       setCanJoin(allowJoin);
-//     };
-
-//     checkJoinWindow();
-//     const interval = setInterval(checkJoinWindow, 15000);
-//     return () => clearInterval(interval);
-//   }, [booking.datetime, booking.duration]);
-
-//   const handleJoin = () => {
-//     navigate(`/meeting/${booking._id}`);
-//   };
-
-// }
-
 // Welcome Header Component
 const WelcomeHeader = ({ consultantData }) => (
-  <div className="flex items-center justify-between mb-8">
+  <div className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl shadow-2xl text-white">
     <div>
-      <h1 className="text-3xl font-bold text-gray-900">
-        Welcome, {consultantData?.data.name || "Consultant"}.
+      <h1 className="text-4xl font-bold mb-2">
+        Welcome back, {consultantData?.data.name || "Consultant"} 👋
       </h1>
-      <p className="text-gray-600 mt-1 capitalize">
+      <p className="text-emerald-100 mb-3 text-lg capitalize">
         {consultantData?.data.primaryCategory} •{" "}
         {consultantData?.data.experience} years experience
       </p>
-      <div className="flex items-center gap-2 mt-1">
+      <div className="flex items-center gap-3">
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold shadow-lg ${
             consultantData?.data.status === "approved"
-              ? "bg-green-100 text-green-800"
-              : "bg-yellow-100 text-yellow-800"
+              ? "bg-green-500 text-white"
+              : "bg-yellow-500 text-white"
           }`}
         >
           {consultantData?.data.status === "approved"
-            ? "Approved"
-            : "Pending Approval"}
+            ? "✓ Approved"
+            : "⏳ Pending Approval"}
         </span>
         {consultantData?.data.visibleOnPlatform && (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Visible on Platform
+          <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-500 text-white shadow-lg">
+            🌟 Live on Platform
           </span>
         )}
       </div>
     </div>
-    <img
-      src={
-        consultantData?.data.profilePicture ||
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-      }
-      alt={consultantData?.data.name}
-      className="w-12 h-12 rounded-full object-cover border-2 border-emerald-200"
-    />
+    <div className="relative">
+      <img
+        src={
+          consultantData?.data.profilePicture ||
+          "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+        }
+        alt={consultantData?.data.name}
+        className="w-16 h-16 rounded-2xl object-cover border-4 border-white shadow-2xl"
+      />
+      <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-400 rounded-full border-3 border-white shadow-lg"></div>
+    </div>
   </div>
 );
 
 // Overview Section Component
 const OverviewSection = ({ stats }) => (
-  <div className="mb-8">
-    <h2 className="text-xl font-semibold text-gray-900 mb-6">Overview</h2>
+  <div className="mb-10">
+    <div className="flex items-center gap-3 mb-8">
+      <div className="w-1 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
+      <h2 className="text-2xl font-bold text-gray-900">Performance Overview</h2>
+    </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
         <StatsCard key={index} {...stat} />
@@ -227,12 +245,12 @@ const OverviewSection = ({ stats }) => (
   </div>
 );
 
-// Upcoming Bookings Section Component
 const UpcomingBookingsSection = ({ bookings }) => (
   <div>
-    <h2 className="text-xl font-semibold text-gray-900 mb-6">
-      Upcoming Bookings
-    </h2>
+    <div className="flex items-center gap-3 mb-8">
+      <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+      <h2 className="text-2xl font-bold text-gray-900">Upcoming Sessions</h2>
+    </div>
     <div className="grid gap-6">
       {bookings.length > 0 ? (
         bookings.map((booking, index) => {
@@ -244,16 +262,6 @@ const UpcomingBookingsSection = ({ bookings }) => (
           });
 
           return (
-            // <BookingCard
-            //   key={booking._id || index}
-            //   booking={{
-            //     clientName: booking.user.name, // Replace with real name if populated
-            //     service: booking.projectDetails,
-            //     date: formattedDate,
-            //     time: formattedTime,
-            //     clientAvatar: "https://via.placeholder.com/150", // Default avatar
-            //   }}
-            // />
             <BookingCard
               key={booking._id}
               booking={{
@@ -272,15 +280,19 @@ const UpcomingBookingsSection = ({ bookings }) => (
           );
         })
       ) : (
-        <Card className="p-6">
-          <div className="text-center py-8">
-            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-2">
-              No upcoming bookings at the moment.
+        <Card className="p-8 text-center bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="max-w-md mx-auto">
+            <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Calendar className="w-10 h-10 text-gray-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              No upcoming bookings
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Your schedule is clear! New bookings will appear here once clients
+              book your services.
             </p>
-            <p className="text-sm text-gray-500">
-              New bookings will appear here once clients book your services.
-            </p>
+            <div className="w-16 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full mx-auto"></div>
           </div>
         </Card>
       )}
@@ -290,12 +302,19 @@ const UpcomingBookingsSection = ({ bookings }) => (
 
 // Services Section Component
 const ServicesSection = ({ services }) => (
-  <div className="mb-8">
-    <h2 className="text-xl font-semibold text-gray-900 mb-6">Your Services</h2>
+  <div className="mb-10">
+    <div className="flex items-center gap-3 mb-8">
+      <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+      <h2 className="text-2xl font-bold text-gray-900">Your Services</h2>
+    </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {services.map((service, index) => (
-        <Card key={index} className="p-4">
-          <p className="font-medium text-gray-900">{service}</p>
+        <Card
+          key={index}
+          className="p-5 hover:transform hover:scale-[1.02] transition-all duration-200 border-l-4 border-l-purple-500"
+        >
+          <p className="font-semibold text-gray-900 text-lg">{service}</p>
+          <div className="w-8 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mt-2"></div>
         </Card>
       ))}
     </div>
@@ -308,6 +327,7 @@ const ConsultantDashboard = () => {
   const [consultantData, setConsultantData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Function to load consultant data
   const loadConsultantData = async () => {
@@ -437,7 +457,7 @@ const ConsultantDashboard = () => {
     switch (activeItem) {
       case "dashboard":
         return (
-          <div className="flex-1 p-8">
+          <div className="flex-1 p-4 sm:p-6 md:p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
             <WelcomeHeader consultantData={consultantData} />
             <OverviewSection stats={statsData} />
             {consultantData?.specializedServices && (
@@ -448,28 +468,31 @@ const ConsultantDashboard = () => {
         );
       case "bookings":
         return (
-          <div className="flex-1 p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">
-              My Bookings
-            </h1>
-            <div className="grid gap-6">
+          <div className="flex-1 p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-10 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+              <h1 className="text-4xl font-bold text-gray-900">My Bookings</h1>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {upcomingBookings.map((booking, index) => {
+                console.log("Booking:", booking);
+                
                 const dateObj = new Date(booking.datetime);
-                const formattedDate = dateObj.toLocaleDateString(); // "MM/DD/YYYY" or "DD/MM/YYYY"
+                const formattedDate = dateObj.toLocaleDateString();
                 const formattedTime = dateObj.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
-                }); // "HH:MM AM/PM"
+                });
 
                 return (
                   <BookingCard
                     key={booking._id || index}
                     booking={{
-                      clientName: booking.user.name, // You can replace this with real name later via populate
+                      clientName: booking.user.name,
                       service: booking.projectDetails,
                       date: formattedDate,
                       time: formattedTime,
-                      clientAvatar: "https://via.placeholder.com/150", // fallback/default avatar
+                      clientAvatar: "https://via.placeholder.com/150",
                     }}
                   />
                 );
@@ -479,98 +502,110 @@ const ConsultantDashboard = () => {
         );
       case "profile":
         return (
-          <div className="flex-1 p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">
-              Edit Profile
-            </h1>
-            <Card className="p-6">
-              <div className="max-w-2xl">
-                <div className="mb-6">
-                  <img
-                    src={
-                      consultantData?.data.profilePicture ||
-                      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-                    }
-                    alt={consultantData?.data.name}
-                    className="w-20 h-20 rounded-full object-cover mb-4 border-2 border-gray-200"
-                  />
-                  <button className="text-emerald-600 font-medium hover:text-emerald-700">
-                    Change Photo
-                  </button>
+          <div className="flex-1 p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-10 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
+              <h1 className="text-4xl font-bold text-gray-900">Edit Profile</h1>
+            </div>
+            <Card className="p-8">
+              <div className="max-w-4xl">
+                <div className="mb-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl">
+                  <div className="flex items-center gap-6">
+                    <div className="relative">
+                      <img
+                        src={
+                          consultantData?.data.profilePicture ||
+                          "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                        }
+                        alt={consultantData?.data.name}
+                        className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-2xl"
+                      />
+                      <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-400 rounded-full border-3 border-white shadow-lg"></div>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        Profile Picture
+                      </h3>
+                      <button className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-2 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg transform hover:scale-105">
+                        Change Photo
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Full Name
                     </label>
                     <input
                       type="text"
                       defaultValue={consultantData?.data.name || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Email
                     </label>
                     <input
                       type="email"
                       defaultValue={consultantData?.data.email || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Phone
                     </label>
                     <input
                       type="tel"
                       defaultValue={consultantData?.data.phoneNumber || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Primary Category
                     </label>
                     <input
                       type="text"
                       defaultValue={consultantData?.data.primaryCategory || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 capitalize"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium capitalize"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Experience (Years)
                     </label>
                     <input
                       type="number"
                       defaultValue={consultantData?.data.experience || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Hourly Rate (₹)
                     </label>
                     <input
                       type="number"
                       defaultValue={consultantData?.data.hourlyRate || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Address
                     </label>
                     <input
                       type="text"
                       defaultValue={consultantData?.data.address || ""}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
                       Availability per Week (Hours)
                     </label>
                     <input
@@ -578,21 +613,21 @@ const ConsultantDashboard = () => {
                       defaultValue={
                         consultantData?.data.availabilityPerWeek || ""
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-200 font-medium"
                     />
                   </div>
                 </div>
 
                 {/* Skills Section */}
-                <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-8">
+                  <label className="block text-sm font-bold text-gray-700 mb-4 uppercase tracking-wide">
                     Key Skills
                   </label>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-3 overflow-x-auto">
                     {consultantData?.data.keySkills?.map((skill, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800"
+                        className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border border-emerald-300 shadow-md"
                       >
                         {skill}
                       </span>
@@ -601,16 +636,16 @@ const ConsultantDashboard = () => {
                 </div>
 
                 {/* Languages Section */}
-                <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-8">
+                  <label className="block text-sm font-bold text-gray-700 mb-4 uppercase tracking-wide">
                     Language Proficiency
                   </label>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-3 overflow-x-auto">
                     {consultantData?.data.languageProficiency?.map(
                       (language, index) => (
                         <span
                           key={index}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 capitalize"
+                          className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 shadow-md capitalize"
                         >
                           {language}
                         </span>
@@ -624,7 +659,7 @@ const ConsultantDashboard = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Specialized Services
                   </label>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4 overflow-x-auto">
                     {consultantData?.data.specializedServices?.map(
                       (service, index) => (
                         <span
@@ -638,7 +673,7 @@ const ConsultantDashboard = () => {
                   </div>
                 </div>
 
-                <button className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors mt-6">
+                <button className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">
                   Save Changes
                 </button>
               </div>
@@ -652,7 +687,7 @@ const ConsultantDashboard = () => {
               More Options
             </h1>
             <div className="grid gap-6">
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Account Settings
                 </h3>
@@ -669,7 +704,7 @@ const ConsultantDashboard = () => {
                 </div>
               </Card>
 
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Documents
                 </h3>
@@ -725,15 +760,39 @@ const ConsultantDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar
-        activeItem={activeItem}
-        setActiveItem={setActiveItem}
-        consultantData={consultantData}
-        onLogout={handleLogout}
-      />
-      {renderContent()}
-    </div>
+    <>
+      {/* Mobile Nav Toggle */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-2 rounded-md bg-gray-900 text-white shadow-md"
+        >
+          <Menu size={24} />
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+        ></div>
+      )}
+
+      {/* Main Layout */}
+      <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
+        <Sidebar
+          activeItem={activeItem}
+          setActiveItem={setActiveItem}
+          consultantData={consultantData}
+          onLogout={handleLogout}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
+        />
+
+        {renderContent()}
+      </div>
+    </>
   );
 };
 

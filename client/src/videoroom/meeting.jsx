@@ -4,24 +4,11 @@ import io from "socket.io-client";
 import { getBookingById } from "../service/bookingApi";
 
 
-//local host
-// const socket = io(
-//   import.meta.env.VITE_API_BASE_URL || "http://localhost:8010",
-//   {
-//     withCredentials: true,
-//   }
-// );
-
-//production
-const socket = io(
-  import.meta.env.VITE_SOCKET_URL || "http://localhost:8010/api/v1",
-  {
-    withCredentials: true,
 
 // const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:8010", {
 //   withCredentials: true,
 // });
-const socket = io(import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com/api/v1", {
+const socket = io(import.meta.env.VITE_SOCKET_URL || "https://api.parrotconsult.com", {
   transports: ["websocket"],
   withCredentials: true,
 });
@@ -167,11 +154,30 @@ export default function MeetingRoom() {
 
       const stream = await requestMediaStream();
 
+      // localStream.current = stream;
+
+      // if (localVideo.current) {
+      //   localVideo.current.srcObject = stream;
+      // }
+
       localStream.current = stream;
 
-      if (localVideo.current) {
-        localVideo.current.srcObject = stream;
-      }
+if (localVideo.current) {
+  localVideo.current.srcObject = stream;
+
+  // Force playback for browsers with autoplay restrictions
+  setTimeout(() => {
+    localVideo.current
+      .play()
+      .then(() => {
+        console.log("📺 Local video is playing");
+      })
+      .catch((err) => {
+        console.error("❌ Local video play() failed:", err);
+      });
+  }, 50);
+}
+
 
       // Create peer connection
       peerConnection.current = new RTCPeerConnection({

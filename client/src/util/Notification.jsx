@@ -100,4 +100,3 @@ export const showNetworkErrorToast = (message) => {
   );
 };
 
-showSuccessToast("sdbjnmbx")

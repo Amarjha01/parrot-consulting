@@ -41,6 +41,7 @@ import GlobalRouter from './routes/Global.Routes.js';
 import userRouter from './routes/User.Routes.js';
 import { PaymentRouter } from './routes/Payment.Routes.js';
 import bookingRouter from './routes/Booking.Routes.js';
+import webhookrouter from './routes/Webhook.Routes.js';
 
 // using routes
 app.use('/api/v1/consultant', ConsultantRouter);
@@ -49,5 +50,6 @@ app.use('/api/v1/global', GlobalRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/payment', PaymentRouter);
 app.use('/api/v1/booking', bookingRouter);
+app.use("/api/v1/webhook", webhookrouter);
 
 export default app;
