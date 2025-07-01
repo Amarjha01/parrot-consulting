@@ -1,6 +1,8 @@
 import React from "react";
 import { MapPin, Clock, IndianRupee, Languages, Star, Badge, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import BookingPage from "../booking/BookingPage";
 
 export default function ConsultantCard({
   consultant,
@@ -17,8 +19,10 @@ export default function ConsultantCard({
     availabilityPerWeek,
     _id
   } = consultant;
+const [isBooking , setIsBooking] = useState(false)
 
   return (
+   <>
     <div className="relative bg-white w-[320px] rounded-2xl p-6 text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 overflow-hidden group">
       
       {/* Offer Tag */}
@@ -137,12 +141,16 @@ export default function ConsultantCard({
           
           <button
             onClick={() => onBookNow(consultant)}
+            // onClick={()=>{setIsBooking(true)}}
             className="flex-1 px-4 py-3 rounded-xl text-white bg-gradient-to-r from-[#348559] via-[#09533d] to-[#113a39] hover:from-[#09533d] hover:to-[#113a39] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
           >
             Book Now
           </button>
+
         </div>
       </div>
     </div>
+ 
+   </>
   );
 }

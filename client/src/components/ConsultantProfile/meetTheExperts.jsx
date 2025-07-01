@@ -3,18 +3,28 @@ import ConsultantCard from "./ConsultantCard";
 import ConsultantBookingForm from "../../forms/BookingForm";
 import { Link } from "react-router-dom";
 import { ArrowRight, Eye } from "lucide-react";
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Calendar, Clock, User, MessageCircle } from 'lucide-react';
+import BookingPage from "../booking/BookingPage";
 export default function MeetExperts({ consultants, onViewProfile }) {
   const [selectedConsultant, setSelectedConsultant] = useState(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-
+const [getStarted , setGetStarted] = useState(false)
   const handleBookNow = (consultant) => {
     const user = JSON.parse(localStorage.getItem("user"));
     setSelectedConsultant(consultant);
     setIsBookingOpen(true);
   };
-
+ const stepVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
   return (
-    <section className="py-12 bg-white">
+    <section className=" bg-white">
     
       <div className="px-4 overflow-hidden relative">
         <Link to={'/ViewAllConsultants'}>
@@ -69,12 +79,84 @@ export default function MeetExperts({ consultants, onViewProfile }) {
           </div>
         )}
       </div>
+{isBookingOpen && <div className="relative bottom-[600px] left-[35%] z-30 border border-green-900 rounded-2xl backdrop-blur-xl h-fit w-fit">
+  <div className="border-gray-200 p-6">
+    <div className="flex items-center space-x-3">
+      <div className="w-8 h-8 bg-gradient-to-r from-[#3b8c60] to-[#207158] rounded-lg flex items-center justify-center">
+        <Calendar className="w-5 h-5 text-white" />
+      </div>
+      <h1 className="text-2xl font-bold text-[#103e39]">Book a consultation</h1>
+    </div>
+  </div>
 
-      <ConsultantBookingForm
+  <div className="p-6">
+    <motion.section
+      className="bg-gradient-to-r from-[#3b8c60]/5 to-[#207158]/5 rounded-2xl p-3"
+      variants={stepVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <h2 className="text-xl font-semibold text-[#103e39] mb-6">How it works</h2>
+      <div className="space-y-4">
+        <div className="flex items-start space-x-4">
+          <div className="w-8 h-8 bg-[#3b8c60] text-white rounded-full flex items-center justify-center font-semibold text-sm">
+            1
+          </div>
+          <div>
+            <h3 className="font-semibold text-[#103e39]">Choose your consult</h3>
+            <p className="text-gray-600">Select the consultant who fits best your needs</p>
+          </div>
+        </div>
+
+        <div className="flex items-start space-x-4">
+          <div className="w-8 h-8 bg-[#3b8c60] text-white rounded-full flex items-center justify-center font-semibold text-sm">
+            2
+          </div>
+          <div>
+            <h3 className="font-semibold text-[#103e39]">Select date & time</h3>
+            <p className="text-gray-600">Pick an available slot that works for you</p>
+          </div>
+        </div>
+
+        <div className="flex items-start space-x-4">
+          <div className="w-8 h-8 bg-[#3b8c60] text-white rounded-full flex items-center justify-center font-semibold text-sm">
+            3
+          </div>
+          <div>
+            <h3 className="font-semibold text-[#103e39]">Let's connect</h3>
+            <p className="text-gray-600">Meet with your consultant and get the guidance you seek</p>
+          </div>
+        </div>
+      </div>
+    </motion.section>
+
+    {/* Modern Get Started Button */}
+    <div onClick={()=>{setGetStarted(true) , setIsBookingOpen(false)}} className="mt-8 flex justify-center">
+      <button className="bg-gradient-to-r from-[#3b8c60] to-[#207158] text-white px-6 py-3 rounded-full text-lg font-semibold shadow-md hover:shadow-xl transition duration-300 ease-in-out hover:scale-105 cursor-pointer">
+        Get Started
+      </button>
+    </div>
+  </div>
+</div>}
+
+
+<BookingPage 
+  isOpen={getStarted}
+  onClose={() => setGetStarted(false)}
+  consultant={{
+    name: "Nandani kalra",
+    about: "Expert business consultant...",
+    weeklyAvailability: {
+      Monday: [{ start: "17:06", end: "20:06", _id: "..." }],
+      // ... other days
+    }
+  }}
+/>
+      {/* <ConsultantBookingForm
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         preSelectedConsultant={selectedConsultant}
-      />
+      /> */}
     </section>
   );
 }
