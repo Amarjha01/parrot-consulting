@@ -25,7 +25,7 @@ export default function ConsultantCard({
       <div className="absolute -top-1 -right-2.5 z-10">
         <div className="bg-gradient-to-r from-[#348559] via-[#09533d] to-[#113a39] text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg transform rotate-12 flex items-center gap-1 animate-pulse">
           <Zap size={12} className="text-yellow-300" />
-          BOOK AT ₹1
+          FREE
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export default function ConsultantCard({
               <IndianRupee className="w-4 h-4 text-[#348559] flex-shrink-0" />
               <div className="text-left">
                 <div className="font-medium text-gray-800 text-xs">Rate</div>
-                <div className="text-gray-600 text-xs "><s>₹{hourlyRate}</s> ₹1 Only!/hour</div>
+                <div className="text-gray-600 text-xs "><s>₹{hourlyRate}/hour</s> FREE</div>
               </div>
             </div>
           </div>
